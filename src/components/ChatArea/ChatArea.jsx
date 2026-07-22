@@ -16,153 +16,57 @@ import {
 } from "react-icons/fi";
 import "./ChatArea.css";
 
-// Sample mock data for the 8-step AI learning flow on "Two Sum"
-const MOCK_TWO_SUM_RESPONSE = {
-  id: "msg-ai-1",
-  type: "ai",
-  topic: "Two Sum",
-  difficulty: "Easy",
-  step1: {
-    title: "Step 1: Problem Understanding",
-    problem: "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.",
-    input: "[2, 7, 11, 15], target = 9",
-    output: "[0, 1] (because nums[0] + nums[1] == 9)",
-    constraints: [
-      "2 <= nums.length <= 10^4",
-      "-10^9 <= nums[i] <= 10^9",
-      "-10^9 <= target <= 10^9",
-      "Only one valid answer exists."
-    ]
-  },
-  step2: {
-    title: "Step 2: Brute Force Solution",
-    idea: "Iterate through each element `i` and search for another element `j` such that `nums[i] + nums[j] == target` using nested loops.",
-    code: `public class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        for (int i = 0; i < nums.length; i++) {
-            for (int j = i + 1; j < nums.length; j++) {
-                if (nums[i] + nums[j] == target) {
-                    return new int[] { i, j };
-                }
-            }
-        }
-        return new int[] {}; // Default fallback
-    }
-}`,
-    dryRun: [
-      "Target is 9. Outer loop i = 0 (val = 2).",
-      "Inner loop j = 1 (val = 7). Check 2 + 7 == 9? Yes. Return [0, 1]."
-    ],
-    timeComplexity: "O(n²)",
-    spaceComplexity: "O(1)"
-  },
-  step3: {
-    question: "Can you think of a way to avoid unnecessary nested loops?",
-    hint1: "Think about storing previously seen values as we iterate.",
-    hint2: "Can a HashMap reduce repeated searching to O(1) time?",
-    hint3: "Current complexity is O(n²). Can we achieve O(n) by checking if (target - nums[i]) exists in our map?"
-  },
-  step5: {
-    title: "Step 5: Optimized Solution",
-    explanation: "We can use a HashMap to store the numbers and their indices. As we iterate through the array, we check if the complement (`target - nums[i]`) already exists in the map. If it does, we return its index and the current index.",
-    code: `import java.util.HashMap;
-import java.util.Map;
-
-public class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        Map<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < nums.length; i++) {
-            int complement = target - nums[i];
-            if (map.containsKey(complement)) {
-                return new int[] { map.get(complement), i };
-            }
-            map.put(nums[i], i);
-        }
-        return new int[] {};
-    }
-}`,
-    dryRun: [
-      "Target is 9. Map is empty: {}.",
-      "i = 0 (val = 2): complement = 9 - 2 = 7. Not in map. Put (2, 0) in map. Map: {2: 0}.",
-      "i = 1 (val = 7): complement = 9 - 7 = 2. Found in map! Retrieve index of 2 (which is 0) and current index 1. Return [0, 1]."
-    ],
-    timeComplexity: "O(n)",
-    spaceComplexity: "O(n)",
-    betterWhy: "By utilizing a HashMap, we trade space complexity O(n) to reduce our lookups from O(n) to O(1), bringing down the total time complexity from quadratic O(n²) to linear O(n)."
-  },
-  step7: {
-    title: "Step 7: Interview Mode Q&A",
-    questions: [
-      {
-        q: "Why HashMap instead of HashSet?",
-        a: "We need to return the indices of the two elements. A HashSet only stores the elements themselves, whereas a HashMap maps each element to its array index, allowing us to retrieve the complement index in O(1) time."
-      },
-      {
-        q: "Can this be solved recursively?",
-        a: "Yes, by passing the current index and map state recursively, but it would build up the call stack frame to O(n) auxiliary space and offer no runtime advantages over the clean iterative approach."
-      },
-      {
-        q: "What if duplicates exist in the input array?",
-        a: "The logic still holds. If we encounter a duplicate, we calculate its complement. If the complement is already in the map (e.g. for input [3, 3] and target 6), we immediately return. If not, the map is overwritten with the latest index, which is fine since we iterate left-to-right."
-      },
-      {
-        q: "What happens when input size becomes 10^7?",
-        a: "An O(n) solution will perform ~10^7 operations which executes under 0.5s in Java. However, the HashMap will allocate considerable memory for 10^7 Entries (approx. 200MB+), which could cause GC overhead. O(n²) would time out (TLE)."
-      }
-    ]
-  },
-  step8: {
-    title: "Step 8: Learning Summary",
+// ==========================================
+// OFFLINE BACKUP MOCK DATA (Local Fallback)
+// ==========================================
+const MOCK_DATASETS = {
+  "two sum": {
+    topic: "Two Sum",
     difficulty: "Easy",
-    concepts: ["HashMap Lookups", "Complement Mapping", "Trade space for time"],
-    mistakes: "Forgetting that indices are needed, resulting in using a Set instead of a Map.",
-    techniques: ["Hash Map caching"],
-    pattern: "Two Sum / Hashing"
-  }
-};
-
-// Sample mock data for a Debugging response when user inputs buggy Java code
-const MOCK_DEBUG_RESPONSE = {
-  id: "msg-ai-debug",
-  type: "ai",
-  topic: "Debugging: NullPointerException & Array Index",
-  isDebug: true,
-  step6: {
-    title: "Step 6: Debugging & Code Repair",
-    errors: [
-      {
-        type: "Compilation Error",
-        problem: "Missing return statement.",
-        reason: "The method returns int[] but does not provide a return statement outside of the conditional loops.",
-        fix: "Add a default fallback return like `return new int[]{};` at the end of the method.",
-      },
-      {
-        type: "Logical Error",
-        problem: "Out-of-bounds index lookup inside inner loop.",
-        reason: "The inner loop condition is `j <= nums.length`, which causes an `ArrayIndexOutOfBoundsException` at the last element.",
-        fix: "Change the inner loop condition to `j < nums.length`.",
-      }
-    ],
-    correctedCode: `public class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        for (int i = 0; i < nums.length; i++) {
-            for (int j = i + 1; j < nums.length; j++) { // Fixed: j < nums.length
-                if (nums[i] + nums[j] == target) {
-                    return new int[] { i, j };
-                }
-            }
-        }
-        return new int[] {}; // Fixed: Added fallback return
+    step1: {
+      title: "Step 1: Problem Understanding",
+      problem: "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.",
+      input: "nums = [2, 7, 11, 15], target = 9",
+      output: "[0, 1] (because nums[0] + nums[1] == 9)",
+      constraints: ["2 <= nums.length <= 10^4", "-10^9 <= nums[i] <= 10^9"]
+    },
+    step2: {
+      title: "Step 2: Brute Force Solution",
+      idea: "Iterate through each element i and search for another element j such that nums[i] + nums[j] == target.",
+      code: "public class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) {\n            for (int j = i + 1; j < nums.length; j++) {\n                if (nums[i] + nums[j] == target) return new int[] { i, j };\n            }\n        }\n        return new int[] {};\n    }\n}",
+      dryRun: ["Target 9. Outer loop i=0 (2). Inner loop j=1 (7). 2 + 7 == 9. Return [0, 1]."],
+      timeComplexity: "O(n²)",
+      spaceComplexity: "O(1)"
+    },
+    step3: {
+      question: "Can you think of a way to avoid unnecessary nested loops?",
+      hint1: "Think about storing previously seen values as we iterate.",
+      hint2: "Can a HashMap reduce repeated searching to O(1) time?",
+      hint3: "Check if (target - nums[i]) exists in our map."
+    },
+    step5: {
+      title: "Step 5: Optimized Solution",
+      explanation: "We use a HashMap to store the numbers and their indices, checking for the complement in O(1) time.",
+      code: "import java.util.HashMap;\nimport java.util.Map;\n\npublic class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> map = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            int complement = target - nums[i];\n            if (map.containsKey(complement)) return new int[] { map.get(complement), i };\n            map.put(nums[i], i);\n        }\n        return new int[] {};\n    }\n}",
+      dryRun: ["i=0 (2): complement=7. Not in map. Put (2,0).", "i=1 (7): complement=2. Found! Return [0,1]."],
+      timeComplexity: "O(n)",
+      spaceComplexity: "O(n)",
+      betterWhy: "Using a HashMap reduces target lookups from O(n) to O(1), improving time complexity to O(n)."
+    },
+    step7: {
+      title: "Step 7: Interview Mode Q&A",
+      questions: [
+        { q: "Why HashMap instead of HashSet?", a: "We need indices. HashMap allows caching value-to-index pairs." }
+      ]
+    },
+    step8: {
+      title: "Step 8: Learning Summary",
+      difficulty: "Easy",
+      concepts: ["HashMap Caching", "Space-Time Tradeoff"],
+      mistakes: "Using a Set which does not preserve index details.",
+      techniques: ["Linear single-pass hashing"],
+      pattern: "Hashing"
     }
-}`
-  },
-  step8: {
-    title: "Step 8: Learning Summary",
-    difficulty: "Easy / Medium",
-    concepts: ["Array Boundary Safety", "Method Return Contracts"],
-    mistakes: "Using '<=' on length arrays, missing exit paths.",
-    techniques: ["Fencepost conditions"],
-    pattern: "Array Indexing"
   }
 };
 
@@ -171,9 +75,11 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {} }) {
   const [inputValue, setInputValue] = useState("");
   const [model, setModel] = useState("CodeMentor-v1");
   const [copiedId, setCopiedId] = useState(null);
-  
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentTopic, setCurrentTopic] = useState("AI Workspace");
+
   // Interactive Optimization States
-  const [optimizationOption, setOptimizationOption] = useState(null); // 'try', 'hint', 'reveal'
+  const [optimizationOption, setOptimizationOption] = useState(null);
   const [revealedHintsCount, setRevealedHintsCount] = useState(0);
   const [isOptimizedUnlocked, setIsOptimizedUnlocked] = useState(false);
   const [openInterviewIndex, setOpenInterviewIndex] = useState(null);
@@ -181,21 +87,18 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {} }) {
   const textareaRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
-  // Load initial prompt if passed down from LandingScreen
   useEffect(() => {
     if (initialPrompt) {
       handleNewUserPrompt(initialPrompt);
     }
   }, [initialPrompt]);
 
-  // Scroll to bottom when messages list updates
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
     }
-  }, [messages, optimizationOption, revealedHintsCount, isOptimizedUnlocked]);
+  }, [messages, isLoading, optimizationOption, revealedHintsCount, isOptimizedUnlocked]);
 
-  // Adjust input textarea height
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -203,21 +106,65 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {} }) {
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [inputValue]);
 
-  const handleNewUserPrompt = (promptText) => {
+  const handleNewUserPrompt = async (promptText) => {
     const userMsg = { id: `msg-user-${Date.now()}`, type: "user", content: promptText };
-    
-    // Choose responses based on whether prompt looks like buggy Java code
-    const isJavaCode = promptText.includes("class ") || promptText.includes("public ") || promptText.includes(";");
-    const aiResponse = isJavaCode ? { ...MOCK_DEBUG_RESPONSE } : { ...MOCK_TWO_SUM_RESPONSE };
-    aiResponse.id = `msg-ai-${Date.now()}`;
+    setMessages((prev) => [...prev, userMsg]);
+    setIsLoading(true);
 
-    setMessages((prev) => [...prev, userMsg, aiResponse]);
-    
-    // Reset interactive panels
+    // Reset interactive states for the new turn
     setOptimizationOption(null);
     setRevealedHintsCount(0);
     setIsOptimizedUnlocked(false);
     setOpenInterviewIndex(null);
+
+    try {
+      // Connect to the Spring Boot REST endpoint
+      const response = await fetch("http://localhost:8080/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: promptText }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error status ${response.status}`);
+      }
+
+      const data = await response.json();
+      data.id = `msg-ai-${Date.now()}`;
+      data.type = "ai";
+
+      if (data.topic) {
+        setCurrentTopic(data.topic);
+      }
+
+      setMessages((prev) => [...prev, data]);
+    } catch (err) {
+      console.warn("Backend unavailable. Loading offline mock database...", err);
+      
+      // Fallback: Check if we have offline responses matching keywords
+      const lowerText = promptText.toLowerCase();
+      let offlineData = MOCK_DATASETS["two-sum"];
+      
+      if (lowerText.includes("two sum") || lowerText.includes("solve") || lowerText.includes("binary") || lowerText.includes("sliding")) {
+        offlineData = { ...MOCK_DATASETS["two sum"] };
+      } else {
+        offlineData = { ...MOCK_DATASETS["two sum"] };
+        offlineData.topic = "Offline Fallback: " + (promptText.length > 20 ? promptText.substring(0, 20) + "..." : promptText);
+      }
+      
+      offlineData.id = `msg-ai-offline-${Date.now()}`;
+      offlineData.type = "ai";
+      
+      // Append a system note about offline mode
+      offlineData.step1.problem = "⚠️ [OFFLINE MODE] Spring Boot server is not responding. Showing fallback demonstration:\n\n" + offlineData.step1.problem;
+      
+      setCurrentTopic(offlineData.topic);
+      setMessages((prev) => [...prev, offlineData]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -268,7 +215,7 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {} }) {
             <span className="logo-text-small">CodeMentor AI</span>
           </button>
           <span className="divider">/</span>
-          <span className="chat-area__current-title">Two Sum optimization</span>
+          <span className="chat-area__current-title">{currentTopic}</span>
         </div>
 
         <div className="chat-area__model-selector">
@@ -283,437 +230,474 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {} }) {
       {/* 2. Scrollable Message Panel */}
       <div className="chat-area__scroll-container" ref={scrollContainerRef}>
         <div className="chat-area__messages-list">
-          {messages.map((msg) => {
-            if (msg.type === "user") {
-              return (
-                <div key={msg.id} className="message-wrapper message-wrapper--user">
-                  <div className="message message--user">
-                    {msg.content.split("\n").map((line, idx) => (
-                      <p key={idx} className="user-message-line">{line}</p>
-                    ))}
+          {messages.length === 0 && !isLoading ? (
+            <div style={{ textAlign: "center", color: "var(--text-faint)", marginTop: "25vh" }}>
+              <FiCpu style={{ fontSize: "2.5rem", marginBottom: "16px" }} />
+              <p>Type or paste your question to begin the learning session.</p>
+            </div>
+          ) : (
+            messages.map((msg) => {
+              if (msg.type === "user") {
+                return (
+                  <div key={msg.id} className="message-wrapper message-wrapper--user">
+                    <div className="message message--user">
+                      {msg.content.split("\n").map((line, idx) => (
+                        <p key={idx} className="user-message-line">{line}</p>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            }
+                );
+              }
 
-            // AI responses follow the 8-step learning flow
-            return (
-              <div key={msg.id} className="message-wrapper message-wrapper--ai">
-                <div className="message message--ai">
-                  
-                  {/* Step 1: Problem Understanding */}
-                  {msg.step1 && (
-                    <section className="learning-step step-understanding">
-                      <h4 className="step-title">{msg.step1.title}</h4>
-                      <p className="problem-text">{msg.step1.problem}</p>
-                      
-                      <div className="example-box">
-                        <div className="example-item">
-                          <span className="example-label">Expected Input:</span>
-                          <code>{msg.step1.input}</code>
-                        </div>
-                        <div className="example-item">
-                          <span className="example-label">Expected Output:</span>
-                          <code>{msg.step1.output}</code>
-                        </div>
-                      </div>
-
-                      <div className="constraints-box">
-                        <span className="constraints-label">Constraints:</span>
-                        <ul className="constraints-list">
-                          {msg.step1.constraints.map((c, i) => (
-                            <li key={i}>{c}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Step 2: Brute Force Solution */}
-                  {msg.step2 && (
-                    <section className="learning-step step-bruteforce card-surface">
-                      <h4 className="step-title">{msg.step2.title}</h4>
-                      <p className="step-desc"><strong>Idea:</strong> {msg.step2.idea}</p>
-
-                      <div className="code-block-wrapper">
-                        <div className="code-block-header">
-                          <span className="code-lang">Java (Brute Force)</span>
-                          <div className="code-actions">
-                            <button
-                              type="button"
-                              className="code-action-btn"
-                              onClick={() => handleCopyCode(msg.step2.code, "brute")}
-                              title="Copy code"
-                            >
-                              {copiedId === "brute" ? <FiCheck className="text-green" /> : <FiCopy />}
-                              <span>{copiedId === "brute" ? "Copied" : "Copy"}</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="code-action-btn"
-                              onClick={() => handleDownloadCode(msg.step2.code, "BruteSolution.java")}
-                              title="Download Java file"
-                            >
-                              <FiDownload />
-                            </button>
+              // AI responses follow the 8-step learning flow
+              return (
+                <div key={msg.id} className="message-wrapper message-wrapper--ai">
+                  <div className="message message--ai">
+                    
+                    {/* Step 1: Problem Understanding */}
+                    {msg.step1 && (
+                      <section className="learning-step step-understanding">
+                        <h4 className="step-title">{msg.step1.title}</h4>
+                        <p className="problem-text">{msg.step1.problem}</p>
+                        
+                        <div className="example-box">
+                          <div className="example-item">
+                            <span className="example-label">Expected Input:</span>
+                            <code>{msg.step1.input}</code>
+                          </div>
+                          <div className="example-item">
+                            <span className="example-label">Expected Output:</span>
+                            <code>{msg.step1.output}</code>
                           </div>
                         </div>
-                        <pre className="code-pre">
-                          <code>{msg.step2.code}</code>
-                        </pre>
-                      </div>
 
-                      <div className="dry-run-box">
-                        <span className="section-label">Dry Run Walkthrough:</span>
-                        <ol className="dry-run-list">
-                          {msg.step2.dryRun.map((step, i) => (
-                            <li key={i}>{step}</li>
-                          ))}
-                        </ol>
-                      </div>
+                        {msg.step1.constraints && msg.step1.constraints.length > 0 && (
+                          <div className="constraints-box">
+                            <span className="constraints-label">Constraints:</span>
+                            <ul className="constraints-list">
+                              {msg.step1.constraints.map((c, i) => (
+                                <li key={i}>{c}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </section>
+                    )}
 
-                      <div className="complexities">
-                        <div className="complexity-badge time">
-                          <span>Time:</span> <strong>{msg.step2.timeComplexity}</strong>
-                        </div>
-                        <div className="complexity-badge space">
-                          <span>Space:</span> <strong>{msg.step2.spaceComplexity}</strong>
-                        </div>
-                      </div>
-                    </section>
-                  )}
+                    {/* Step 2: Brute Force Solution */}
+                    {msg.step2 && (
+                      <section className="learning-step step-bruteforce card-surface">
+                        <h4 className="step-title">{msg.step2.title}</h4>
+                        <p className="step-desc"><strong>Idea:</strong> {msg.step2.idea}</p>
 
-                  {/* Step 3: Think Before Optimization (Interactive Panel) */}
-                  {msg.step3 && (
-                    <section className="learning-step step-think card-surface card-surface--glow">
-                      <div className="step-think__header">
-                        <FiCpu className="step-think__icon" />
-                        <h4 className="step-think__title">Think Before Optimization</h4>
-                      </div>
-                      <p className="step-think__question">{msg.step3.question}</p>
+                        {msg.step2.code && (
+                          <div className="code-block-wrapper">
+                            <div className="code-block-header">
+                              <span className="code-lang">Java (Brute Force)</span>
+                              <div className="code-actions">
+                                <button
+                                  type="button"
+                                  className="code-action-btn"
+                                  onClick={() => handleCopyCode(msg.step2.code, "brute")}
+                                  title="Copy code"
+                                >
+                                  {copiedId === "brute" ? <FiCheck className="text-green" /> : <FiCopy />}
+                                  <span>{copiedId === "brute" ? "Copied" : "Copy"}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="code-action-btn"
+                                  onClick={() => handleDownloadCode(msg.step2.code, "BruteSolution.java")}
+                                  title="Download Java"
+                                >
+                                  <FiDownload />
+                                </button>
+                              </div>
+                            </div>
+                            <pre className="code-pre">
+                              <code>{msg.step2.code}</code>
+                            </pre>
+                          </div>
+                        )}
 
-                      <div className="step-think__buttons">
-                        <button
-                          type="button"
-                          className={`think-btn ${optimizationOption === "try" ? "think-btn--active" : ""}`}
-                          onClick={() => setOptimizationOption("try")}
-                        >
-                          I Want to Try
-                        </button>
-                        <button
-                          type="button"
-                          className={`think-btn ${optimizationOption === "hint" ? "think-btn--active" : ""}`}
-                          onClick={() => {
-                            setOptimizationOption("hint");
-                            setRevealedHintsCount((c) => Math.min(3, c === 0 ? 1 : c));
-                          }}
-                        >
-                          Show Hint
-                        </button>
-                        <button
-                          type="button"
-                          className={`think-btn think-btn--primary ${isOptimizedUnlocked ? "think-btn--active" : ""}`}
-                          onClick={() => {
-                            setIsOptimizedUnlocked(true);
-                            setOptimizationOption("reveal");
-                          }}
-                        >
-                          Reveal Optimized Solution
-                        </button>
-                      </div>
+                        {msg.step2.dryRun && msg.step2.dryRun.length > 0 && (
+                          <div className="dry-run-box">
+                            <span className="section-label">Dry Run Walkthrough:</span>
+                            <ol className="dry-run-list">
+                              {msg.step2.dryRun.map((step, i) => (
+                                <li key={i}>{step}</li>
+                              ))}
+                            </ol>
+                          </div>
+                        )}
 
-                      {/* Interactive Option 1: User tries it */}
-                      {optimizationOption === "try" && (
-                        <div className="think-panel-expand try-panel">
-                          <p className="try-panel__text">
-                            Great! How would you solve this in linear time? Type your idea (e.g. using a Map, sorting first, etc.):
-                          </p>
-                          <div className="try-panel__input-group">
-                            <input
-                              type="text"
-                              placeholder="Type your explanation..."
-                              className="try-panel__input"
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  alert("Your feedback has been noted! Let's examine the hints and optimized code.");
-                                  setIsOptimizedUnlocked(true);
-                                }
-                              }}
-                            />
-                            <button
-                              type="button"
-                              className="try-panel__submit"
-                              onClick={() => {
-                                alert("Your suggestion is saved. Let's reveal the optimized solution.");
-                                setIsOptimizedUnlocked(true);
-                              }}
-                            >
-                              Check
-                            </button>
+                        <div className="complexities">
+                          <div className="complexity-badge time">
+                            <span>Time:</span> <strong>{msg.step2.timeComplexity}</strong>
+                          </div>
+                          <div className="complexity-badge space">
+                            <span>Space:</span> <strong>{msg.step2.spaceComplexity}</strong>
                           </div>
                         </div>
-                      )}
+                      </section>
+                    )}
 
-                      {/* Interactive Option 2: Hint System (gradual release) */}
-                      {optimizationOption === "hint" && (
-                        <div className="think-panel-expand hint-panel">
-                          <div className="hints-list">
-                            {revealedHintsCount >= 1 && (
-                              <div className="hint-item animate-hint">
-                                <span className="hint-badge">Hint 1</span>
-                                <p>{msg.step3.hint1}</p>
-                              </div>
-                            )}
-                            {revealedHintsCount >= 2 && (
-                              <div className="hint-item animate-hint">
-                                <span className="hint-badge">Hint 2</span>
-                                <p>{msg.step3.hint2}</p>
-                              </div>
-                            )}
-                            {revealedHintsCount >= 3 && (
-                              <div className="hint-item animate-hint">
-                                <span className="hint-badge">Hint 3</span>
-                                <p>{msg.step3.hint3}</p>
-                              </div>
-                            )}
-                          </div>
+                    {/* Step 3: Think Before Optimization */}
+                    {msg.step3 && (
+                      <section className="learning-step step-think card-surface card-surface--glow">
+                        <div className="step-think__header">
+                          <FiCpu className="step-think__icon" />
+                          <h4 className="step-think__title">Think Before Optimization</h4>
+                        </div>
+                        <p className="step-think__question">{msg.step3.question}</p>
 
-                          <div className="hint-panel__actions">
-                            {revealedHintsCount < 3 ? (
+                        <div className="step-think__buttons">
+                          <button
+                            type="button"
+                            className={`think-btn ${optimizationOption === "try" ? "think-btn--active" : ""}`}
+                            onClick={() => setOptimizationOption("try")}
+                          >
+                            I Want to Try
+                          </button>
+                          <button
+                            type="button"
+                            className={`think-btn ${optimizationOption === "hint" ? "think-btn--active" : ""}`}
+                            onClick={() => {
+                              setOptimizationOption("hint");
+                              setRevealedHintsCount((c) => Math.min(3, c === 0 ? 1 : c));
+                            }}
+                          >
+                            Show Hint
+                          </button>
+                          <button
+                            type="button"
+                            className={`think-btn think-btn--primary ${isOptimizedUnlocked ? "think-btn--active" : ""}`}
+                            onClick={() => {
+                              setIsOptimizedUnlocked(true);
+                              setOptimizationOption("reveal");
+                            }}
+                          >
+                            Reveal Optimized Solution
+                          </button>
+                        </div>
+
+                        {/* Option 1: User Input */}
+                        {optimizationOption === "try" && (
+                          <div className="think-panel-expand try-panel">
+                            <p className="try-panel__text">
+                              How would you solve this optimally? Type your suggestion:
+                            </p>
+                            <div className="try-panel__input-group">
+                              <input
+                                type="text"
+                                placeholder="Type your idea..."
+                                className="try-panel__input"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    setIsOptimizedUnlocked(true);
+                                  }
+                                }}
+                              />
                               <button
                                 type="button"
-                                className="hint-action-btn"
-                                onClick={() => setRevealedHintsCount((c) => c + 1)}
-                              >
-                                Next Hint
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                className="hint-action-btn hint-action-btn--primary"
+                                className="try-panel__submit"
                                 onClick={() => setIsOptimizedUnlocked(true)}
                               >
-                                Reveal Optimized Solution
+                                Check
                               </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </section>
-                  )}
-
-                  {/* Step 5: Optimized Solution */}
-                  {msg.step5 && isOptimizedUnlocked && (
-                    <section className="learning-step step-optimized card-surface animate-fade-in">
-                      <h4 className="step-title">{msg.step5.title}</h4>
-                      <p className="step-desc">{msg.step5.explanation}</p>
-
-                      <div className="code-block-wrapper">
-                        <div className="code-block-header">
-                          <span className="code-lang">Java (HashMap Optimized)</span>
-                          <div className="code-actions">
-                            <button
-                              type="button"
-                              className="code-action-btn"
-                              onClick={() => handleCopyCode(msg.step5.code, "opt")}
-                              title="Copy code"
-                            >
-                              {copiedId === "opt" ? <FiCheck className="text-green" /> : <FiCopy />}
-                              <span>{copiedId === "opt" ? "Copied" : "Copy"}</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="code-action-btn"
-                              onClick={() => handleDownloadCode(msg.step5.code, "OptimizedSolution.java")}
-                              title="Download Java file"
-                            >
-                              <FiDownload />
-                            </button>
-                          </div>
-                        </div>
-                        <pre className="code-pre">
-                          <code>{msg.step5.code}</code>
-                        </pre>
-                      </div>
-
-                      <div className="dry-run-box">
-                        <span className="section-label">Optimized Dry Run:</span>
-                        <ol className="dry-run-list">
-                          {msg.step5.dryRun.map((step, i) => (
-                            <li key={i}>{step}</li>
-                          ))}
-                        </ol>
-                      </div>
-
-                      <div className="complexities">
-                        <div className="complexity-badge time">
-                          <span>Time Complexity:</span> <strong>{msg.step5.timeComplexity}</strong>
-                        </div>
-                        <div className="complexity-badge space">
-                          <span>Space Complexity:</span> <strong>{msg.step5.spaceComplexity}</strong>
-                        </div>
-                      </div>
-
-                      <div className="why-better-box">
-                        <span className="section-label">Why this approach is better:</span>
-                        <p>{msg.step5.betterWhy}</p>
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Step 6: Debugging & Repairs (Only shown if isDebug mode is active) */}
-                  {msg.isDebug && msg.step6 && (
-                    <section className="learning-step step-debugging">
-                      <h4 className="step-title">{msg.step6.title}</h4>
-                      <p className="step-desc">
-                        CodeMentor detected bugs in your Java class. Here is a breakdown of compilation, runtime, and logical issues:
-                      </p>
-
-                      <div className="errors-grid">
-                        {msg.step6.errors.map((err, idx) => (
-                          <div key={idx} className="error-card">
-                            <div className="error-card__header">
-                              <FiAlertTriangle className="error-card__alert-icon" />
-                              <span className="error-card__type">{err.type}</span>
-                            </div>
-                            <div className="error-card__body">
-                              <p><strong>Problem:</strong> {err.problem}</p>
-                              <p><strong>Reason:</strong> {err.reason}</p>
-                              <p className="error-card__fix"><strong>Fix:</strong> {err.fix}</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        )}
 
-                      <div className="code-block-wrapper">
-                        <div className="code-block-header">
-                          <span className="code-lang">Corrected Java Code</span>
-                          <div className="code-actions">
-                            <button
-                              type="button"
-                              className="code-action-btn"
-                              onClick={() => handleCopyCode(msg.step6.correctedCode, "debug")}
-                              title="Copy code"
-                            >
-                              {copiedId === "debug" ? <FiCheck className="text-green" /> : <FiCopy />}
-                              <span>{copiedId === "debug" ? "Copied" : "Copy"}</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="code-action-btn"
-                              onClick={() => handleDownloadCode(msg.step6.correctedCode, "SolutionFixed.java")}
-                              title="Download Java file"
-                            >
-                              <FiDownload />
-                            </button>
-                          </div>
-                        </div>
-                        <pre className="code-pre">
-                          <code>{msg.step6.correctedCode}</code>
-                        </pre>
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Step 7: Interview Mode */}
-                  {msg.step7 && isOptimizedUnlocked && (
-                    <section className="learning-step step-interview card-surface">
-                      <div className="step-interview__header">
-                        <FiHelpCircle className="step-interview__icon" />
-                        <h4 className="step-title">{msg.step7.title}</h4>
-                      </div>
-                      <p className="step-desc">
-                        Prepare for follow-ups! Recruiters frequently ask these questions about this specific problem:
-                      </p>
-
-                      <div className="qa-accordion">
-                        {msg.step7.questions.map((item, idx) => {
-                          const isOpen = openInterviewIndex === idx;
-                          return (
-                            <div key={idx} className={`qa-item ${isOpen ? "qa-item--open" : ""}`}>
-                              <button
-                                type="button"
-                                className="qa-question-btn"
-                                onClick={() => setOpenInterviewIndex(isOpen ? null : idx)}
-                              >
-                                <span>{item.q}</span>
-                                {isOpen ? <FiChevronDown /> : <FiChevronRight />}
-                              </button>
-                              {isOpen && (
-                                <div className="qa-answer-content">
-                                  <p>{item.a}</p>
+                        {/* Option 2: Hint System */}
+                        {optimizationOption === "hint" && (
+                          <div className="think-panel-expand hint-panel">
+                            <div className="hints-list">
+                              {revealedHintsCount >= 1 && (
+                                <div className="hint-item animate-hint">
+                                  <span className="hint-badge">Hint 1</span>
+                                  <p>{msg.step3.hint1}</p>
+                                </div>
+                              )}
+                              {revealedHintsCount >= 2 && (
+                                <div className="hint-item animate-hint">
+                                  <span className="hint-badge">Hint 2</span>
+                                  <p>{msg.step3.hint2}</p>
+                                </div>
+                              )}
+                              {revealedHintsCount >= 3 && (
+                                <div className="hint-item animate-hint">
+                                  <span className="hint-badge">Hint 3</span>
+                                  <p>{msg.step3.hint3}</p>
                                 </div>
                               )}
                             </div>
-                          );
-                        })}
-                      </div>
-                    </section>
-                  )}
 
-                  {/* Step 8: Learning Summary */}
-                  {msg.step8 && (
-                    <section className="learning-step step-summary card-surface card-surface--glow">
-                      <div className="step-summary__header">
-                        <FiAward className="step-summary__icon" />
-                        <h4 className="step-title">{msg.step8.title}</h4>
-                      </div>
+                            <div className="hint-panel__actions">
+                              {revealedHintsCount < 3 ? (
+                                <button
+                                  type="button"
+                                  className="hint-action-btn"
+                                  onClick={() => setRevealedHintsCount((c) => c + 1)}
+                                >
+                                  Next Hint
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="hint-action-btn hint-action-btn--primary"
+                                  onClick={() => setIsOptimizedUnlocked(true)}
+                                >
+                                  Reveal Optimized Solution
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </section>
+                    )}
 
-                      <div className="summary-details">
-                        <div className="summary-group">
-                          <span className="summary-label">Key Concepts Learned:</span>
-                          <div className="summary-badges-container">
-                            {msg.step8.concepts.map((c, i) => (
-                              <span key={i} className="summary-badge-item">{c}</span>
-                            ))}
+                    {/* Step 5: Optimized Solution */}
+                    {msg.step5 && isOptimizedUnlocked && (
+                      <section className="learning-step step-optimized card-surface animate-fade-in">
+                        <h4 className="step-title">{msg.step5.title}</h4>
+                        <p className="step-desc">{msg.step5.explanation}</p>
+
+                        {msg.step5.code && (
+                          <div className="code-block-wrapper">
+                            <div className="code-block-header">
+                              <span className="code-lang">Java (Optimized)</span>
+                              <div className="code-actions">
+                                <button
+                                  type="button"
+                                  className="code-action-btn"
+                                  onClick={() => handleCopyCode(msg.step5.code, "opt")}
+                                  title="Copy code"
+                                >
+                                  {copiedId === "opt" ? <FiCheck className="text-green" /> : <FiCopy />}
+                                  <span>{copiedId === "opt" ? "Copied" : "Copy"}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="code-action-btn"
+                                  onClick={() => handleDownloadCode(msg.step5.code, "OptimizedSolution.java")}
+                                  title="Download Java"
+                                >
+                                  <FiDownload />
+                                </button>
+                              </div>
+                            </div>
+                            <pre className="code-pre">
+                              <code>{msg.step5.code}</code>
+                            </pre>
+                          </div>
+                        )}
+
+                        {msg.step5.dryRun && msg.step5.dryRun.length > 0 && (
+                          <div className="dry-run-box">
+                            <span className="section-label">Optimized Dry Run:</span>
+                            <ol className="dry-run-list">
+                              {msg.step5.dryRun.map((step, i) => (
+                                <li key={i}>{step}</li>
+                              ))}
+                            </ol>
+                          </div>
+                        )}
+
+                        <div className="complexities">
+                          <div className="complexity-badge time">
+                            <span>Time:</span> <strong>{msg.step5.timeComplexity}</strong>
+                          </div>
+                          <div className="complexity-badge space">
+                            <span>Space:</span> <strong>{msg.step5.spaceComplexity}</strong>
                           </div>
                         </div>
 
-                        <div className="summary-group">
-                          <span className="summary-label">Optimization Techniques:</span>
-                          <p className="summary-text">
-                            {msg.step8.techniques ? msg.step8.techniques.join(", ") : "N/A"}
-                          </p>
+                        <div className="why-better-box">
+                          <span className="section-label">Why this approach is better:</span>
+                          <p>{msg.step5.betterWhy}</p>
+                        </div>
+                      </section>
+                    )}
+
+                    {/* Step 6: Debugging details */}
+                    {msg.isDebug && msg.step6 && (
+                      <section className="learning-step step-debugging">
+                        <h4 className="step-title">{msg.step6.title}</h4>
+                        <p className="step-desc">
+                          Bug analysis report for your Java submission:
+                        </p>
+
+                        <div className="errors-grid">
+                          {msg.step6.errors && msg.step6.errors.map((err, idx) => (
+                            <div key={idx} className="error-card">
+                              <div className="error-card__header">
+                                <FiAlertTriangle className="error-card__alert-icon" />
+                                <span className="error-card__type">{err.type}</span>
+                              </div>
+                              <div className="error-card__body">
+                                <p><strong>Problem:</strong> {err.problem}</p>
+                                <p><strong>Reason:</strong> {err.reason}</p>
+                                <p className="error-card__fix"><strong>Fix:</strong> {err.fix}</p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
 
-                        <div className="summary-group">
-                          <span className="summary-label">Avoid Common Mistakes:</span>
-                          <p className="summary-text text-orange">{msg.step8.mistakes}</p>
-                        </div>
-
-                        <div className="summary-row-double">
-                          <div>
-                            <span className="summary-label">Pattern Used:</span>
-                            <span className="text-primary font-mono">{msg.step8.pattern || "N/A"}</span>
+                        {msg.step6.correctedCode && (
+                          <div className="code-block-wrapper">
+                            <div className="code-block-header">
+                              <span className="code-lang">Repaired Java Code</span>
+                              <div className="code-actions">
+                                <button
+                                  type="button"
+                                  className="code-action-btn"
+                                  onClick={() => handleCopyCode(msg.step6.correctedCode, "debug")}
+                                  title="Copy code"
+                                >
+                                  {copiedId === "debug" ? <FiCheck className="text-green" /> : <FiCopy />}
+                                  <span>{copiedId === "debug" ? "Copied" : "Copy"}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="code-action-btn"
+                                  onClick={() => handleDownloadCode(msg.step6.correctedCode, "SolutionFixed.java")}
+                                  title="Download Java"
+                                >
+                                  <FiDownload />
+                                </button>
+                              </div>
+                            </div>
+                            <pre className="code-pre">
+                              <code>{msg.step6.correctedCode}</code>
+                            </pre>
                           </div>
-                          <div>
-                            <span className="summary-label">Difficulty:</span>
-                            <span className={`difficulty-badge difficulty-badge--${msg.step8.difficulty.toLowerCase()}`}>
-                              {msg.step8.difficulty}
-                            </span>
+                        )}
+                      </section>
+                    )}
+
+                    {/* Step 7: Interview Qs */}
+                    {msg.step7 && (msg.step7.questions && msg.step7.questions.length > 0) && (isOptimizedUnlocked || msg.isDebug) && (
+                      <section className="learning-step step-interview card-surface">
+                        <div className="step-interview__header">
+                          <FiHelpCircle className="step-interview__icon" />
+                          <h4 className="step-title">{msg.step7.title}</h4>
+                        </div>
+                        <p className="step-desc">Possible interviewer follow-ups:</p>
+
+                        <div className="qa-accordion">
+                          {msg.step7.questions.map((item, idx) => {
+                            const isOpen = openInterviewIndex === idx;
+                            return (
+                              <div key={idx} className={`qa-item ${isOpen ? "qa-item--open" : ""}`}>
+                                <button
+                                  type="button"
+                                  className="qa-question-btn"
+                                  onClick={() => setOpenInterviewIndex(isOpen ? null : idx)}
+                                >
+                                  <span>{item.q}</span>
+                                  {isOpen ? <FiChevronDown /> : <FiChevronRight />}
+                                </button>
+                                {isOpen && (
+                                  <div className="qa-answer-content">
+                                    <p>{item.a}</p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    )}
+
+                    {/* Step 8: Learning Summary */}
+                    {msg.step8 && (
+                      <section className="learning-step step-summary card-surface card-surface--glow">
+                        <div className="step-summary__header">
+                          <FiAward className="step-summary__icon" />
+                          <h4 className="step-title">{msg.step8.title}</h4>
+                        </div>
+
+                        <div className="summary-details">
+                          {msg.step8.concepts && msg.step8.concepts.length > 0 && (
+                            <div className="summary-group">
+                              <span className="summary-label">Key Concepts:</span>
+                              <div className="summary-badges-container">
+                                {msg.step8.concepts.map((c, i) => (
+                                  <span key={i} className="summary-badge-item">{c}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {msg.step8.techniques && msg.step8.techniques.length > 0 && (
+                            <div className="summary-group">
+                              <span className="summary-label">Optimization Techniques:</span>
+                              <p className="summary-text">{msg.step8.techniques.join(", ")}</p>
+                            </div>
+                          )}
+
+                          {msg.step8.mistakes && (
+                            <div className="summary-group">
+                              <span className="summary-label">Common Mistakes:</span>
+                              <p className="summary-text text-orange">{msg.step8.mistakes}</p>
+                            </div>
+                          )}
+
+                          <div className="summary-row-double">
+                            <div>
+                              <span className="summary-label">Pattern:</span>
+                              <span className="text-primary font-mono">{msg.step8.pattern || "N/A"}</span>
+                            </div>
+                            <div>
+                              <span className="summary-label">Difficulty:</span>
+                              <span className={`difficulty-badge difficulty-badge--${(msg.step8.difficulty || "easy").toLowerCase()}`}>
+                                {msg.step8.difficulty || "Easy"}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </section>
-                  )}
+                      </section>
+                    )}
 
-                  {/* Message Bottom Action: Regenerate */}
-                  <div className="ai-message-footer">
-                    <button
-                      type="button"
-                      className="regenerate-btn"
-                      onClick={() => handleNewUserPrompt(messages[messages.length - 2].content)}
-                      title="Regenerate AI Response"
-                    >
-                      <FiRefreshCw />
-                      <span>Regenerate Response</span>
-                    </button>
+                    {/* Action footer */}
+                    <div className="ai-message-footer">
+                      <button
+                        type="button"
+                        className="regenerate-btn"
+                        onClick={() => handleNewUserPrompt(messages[messages.length - 2].content)}
+                        title="Regenerate AI Response"
+                      >
+                        <FiRefreshCw />
+                        <span>Regenerate Response</span>
+                      </button>
+                    </div>
+
                   </div>
-
                 </div>
+              );
+            })
+          )}
+
+          {/* SKELETON TYPING LOADER */}
+          {isLoading && (
+            <div className="message-wrapper message-wrapper--ai">
+              <div className="message message--ai">
+                <section className="learning-step card-surface skeleton-pulse">
+                  <div className="skeleton-title"></div>
+                  <div className="skeleton-text"></div>
+                  <div className="skeleton-text"></div>
+                  <div className="skeleton-text short"></div>
+                  <div className="typing-loader">
+                    <span className="typing-dot"></span>
+                    <span className="typing-dot"></span>
+                    <span className="typing-dot"></span>
+                  </div>
+                </section>
               </div>
-            );
-          })}
+            </div>
+          )}
+
         </div>
       </div>
 
@@ -729,6 +713,7 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {} }) {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
+              disabled={isLoading}
             />
             <div className="chat-area__input-actions">
               <div className="chat-area__input-actions-left">
@@ -737,6 +722,7 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {} }) {
                   className="input-action-btn"
                   onClick={handleAttachCode}
                   title="Attach Java Code"
+                  disabled={isLoading}
                 >
                   <FiPaperclip />
                   <span className="input-action-btn__text">Attach Code</span>
@@ -746,14 +732,15 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {} }) {
                   className="input-action-btn"
                   title="Voice Input (Optional)"
                   onClick={() => alert("Voice input module is not configured.")}
+                  disabled={isLoading}
                 >
                   <FiMic />
                 </button>
               </div>
               <button
                 type="submit"
-                className={`chat-area__submit-btn ${inputValue.trim() ? "chat-area__submit-btn--active" : ""}`}
-                disabled={!inputValue.trim()}
+                className={`chat-area__submit-btn ${inputValue.trim() && !isLoading ? "chat-area__submit-btn--active" : ""}`}
+                disabled={!inputValue.trim() || isLoading}
               >
                 <FiSend />
               </button>

@@ -1,0 +1,707 @@
+/* SettingsModal.css
+   Styles for the SettingsModal component.
+   Full-screen overlay with glassmorphism panel that slides in from the right.
+   Relies on CSS variables defined in index.css.
+*/
+
+/* ======================================================
+   OVERLAY BACKDROP
+   ====================================================== */
+.settings-overlay {
+  position: fixed;
+  inset: 0;                           /* Cover entire viewport */
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;          /* Panel slides in from right */
+  animation: overlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ======================================================
+   MODAL PANEL
+   ====================================================== */
+.settings-modal {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 780px;
+  height: 100%;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-subtle);
+  overflow: hidden;
+  animation: slideInRight 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  box-shadow: -12px 0 48px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Close button – top-right corner */
+.settings-modal__close {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all var(--transition-normal);
+}
+
+.settings-modal__close:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+/* ======================================================
+   LEFT SIDEBAR
+   ====================================================== */
+.settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 210px;
+  flex-shrink: 0;
+  padding: 1.75rem 0.75rem 1.5rem;
+  border-right: 1px solid var(--border-subtle);
+  background: var(--bg-void);
+  overflow-y: auto;
+}
+
+.settings-sidebar__heading {
+  margin: 0 0 1.25rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+
+.settings-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* Navigation item button */
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.settings-nav-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.settings-nav-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.settings-nav-item__icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ======================================================
+   MAIN CONTENT AREA
+   ====================================================== */
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 2.25rem;
+  font-family: var(--font-ui);
+}
+
+/* ======================================================
+   SECTION BASE STYLES
+   ====================================================== */
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 520px;
+}
+
+.settings-section__title {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-section__sub {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+}
+
+/* ======================================================
+   SETTING ROW (label + control)
+   ====================================================== */
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-row:last-child {
+  border-bottom: none;
+}
+
+.settings-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.settings-row__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-row__desc {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  line-height: 1.4;
+}
+
+.settings-row__control {
+  flex-shrink: 0;
+}
+
+/* ======================================================
+   TOGGLE SWITCH
+   ====================================================== */
+.settings-toggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.settings-toggle__input {
+  /* Hidden but accessible */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settings-toggle__track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--bg-active);
+  border: 1px solid var(--border-subtle);
+  transition: background var(--transition-normal), border-color var(--transition-normal);
+}
+
+/* Checked state */
+.settings-toggle__input:checked + .settings-toggle__track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.settings-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  transition: transform var(--transition-normal);
+}
+
+.settings-toggle__input:checked + .settings-toggle__track .settings-toggle__thumb {
+  transform: translateX(20px);
+}
+
+/* ======================================================
+   THEME TOGGLE (Dark/Light buttons)
+   ====================================================== */
+.settings-theme-toggle,
+.settings-font-selector {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.settings-theme-btn,
+.settings-font-btn {
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.settings-theme-btn:hover,
+.settings-font-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.settings-theme-btn.active,
+.settings-font-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ======================================================
+   SELECT DROPDOWN
+   ====================================================== */
+.settings-select {
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition-normal);
+  min-width: 150px;
+}
+
+.settings-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ======================================================
+   TEMPERATURE SLIDER
+   ====================================================== */
+.settings-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.settings-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bg-active);
+  outline: none;
+  cursor: pointer;
+}
+
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.settings-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.settings-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+}
+
+.settings-slider-value {
+  min-width: 2.5rem;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ======================================================
+   API KEY BLOCK
+   ====================================================== */
+.settings-apikey-block {
+  margin-top: 1rem;
+  padding: 1.1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-void);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.settings-apikey-note {
+  margin: 0;
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.settings-apikey-note strong {
+  color: var(--text-primary);
+}
+
+.settings-apikey-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.settings-apikey-input-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.settings-apikey-input {
+  width: 100%;
+  padding: 0.6rem 2.4rem 0.6rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--transition-normal);
+}
+
+.settings-apikey-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.settings-apikey-input::placeholder {
+  color: var(--text-faint);
+  letter-spacing: 0.05em;
+}
+
+/* Show/hide eye button */
+.settings-apikey-eye {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: color var(--transition-normal);
+}
+
+.settings-apikey-eye:hover {
+  color: var(--text-primary);
+}
+
+/* Save button */
+.settings-apikey-save {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-normal), transform 0.1s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.settings-apikey-save:hover {
+  background: var(--accent-hover);
+}
+
+.settings-apikey-save:active {
+  transform: scale(0.97);
+}
+
+/* Saved feedback state */
+.settings-apikey-save.saved {
+  background: #34c759;
+}
+
+/* ======================================================
+   KEYBOARD SHORTCUTS TABLE
+   ====================================================== */
+.settings-shortcuts-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+}
+
+.settings-shortcuts-table thead tr {
+  background: var(--bg-void);
+}
+
+.settings-shortcuts-table th {
+  padding: 0.65rem 1rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-shortcuts-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.settings-shortcuts-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.settings-shortcuts-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+/* Individual key chip */
+.settings-kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-active);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  box-shadow: 0 2px 0 var(--border-subtle);
+}
+
+.settings-kbd-plus {
+  margin: 0 0.25rem;
+  color: var(--text-faint);
+  font-size: 0.75rem;
+}
+
+.settings-shortcuts-action {
+  color: var(--text-muted);
+}
+
+/* ======================================================
+   ABOUT SECTION
+   ====================================================== */
+.settings-about-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-void);
+  margin-top: 0.5rem;
+}
+
+.settings-about-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.settings-about-logo-icon {
+  font-size: 2rem;
+}
+
+.settings-about-app-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.settings-about-version {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+
+.settings-about-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.settings-about-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settings-about-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--accent);
+  text-decoration: none;
+  width: fit-content;
+  transition: color var(--transition-normal);
+}
+
+.settings-about-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.settings-about-link-ext {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.settings-about-license {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.83rem;
+}
+
+.settings-about-license-label {
+  color: var(--text-faint);
+  min-width: 80px;
+}
+
+.settings-about-license-value {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* ======================================================
+   SCROLLBAR STYLING (webkit)
+   ====================================================== */
+.settings-sidebar::-webkit-scrollbar,
+.settings-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.settings-sidebar::-webkit-scrollbar-track,
+.settings-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-sidebar::-webkit-scrollbar-thumb,
+.settings-content::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 999px;
+}
+
+/* ======================================================
+   RESPONSIVE
+   ====================================================== */
+@media (max-width: 600px) {
+  .settings-modal {
+    max-width: 100%;
+    flex-direction: column;
+  }
+
+  .settings-sidebar {
+    width: 100%;
+    flex-direction: row;
+    padding: 0.75rem;
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+    gap: 0.25rem;
+    overflow-x: auto;
+  }
+
+  .settings-sidebar__heading {
+    display: none;
+  }
+
+  .settings-sidebar__nav {
+    flex-direction: row;
+    gap: 0.25rem;
+  }
+
+  .settings-nav-item {
+    padding: 0.5rem 0.65rem;
+    white-space: nowrap;
+    font-size: 0.78rem;
+  }
+
+  .settings-content {
+    padding: 1.25rem 1rem;
+  }
+}

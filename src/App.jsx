@@ -1,6 +1,11 @@
-import { useState } from "react";
-import Sidebar from "./components/Sidebar";
+import { useState, useEffect } from "react";
+import Sidebar from "./components/Sidebar/Sidebar";
 import LandingScreen from "./components/LandingScreen/LandingScreen";
+import ChatArea from "./components/ChatArea/ChatArea";
+import LearningDashboard from "./components/LearningDashboard/LearningDashboard";
+import ProfilePage from "./components/ProfilePage/ProfilePage";
+import HistoryPage from "./components/HistoryPage/HistoryPage";
+import SettingsModal from "./components/SettingsModal/SettingsModal";
 import "./App.css";
 
 /**
@@ -9,10 +14,16 @@ import "./App.css";
  * Root component of CodeMentor AI.
  * Renders the three-column layout:
  * 1. Collapsible Sidebar (Left)
- * 2. Main Content Area (Center): renders LandingScreen or ChatArea depending on state
+ * 2. Main Content Area (Center): renders LandingScreen, ChatArea, ProfilePage, or HistoryPage
  * 3. Learning Dashboard Sidebar (Right)
  */
 function App() {
+  // Navigation view: 'chat', 'profile', or 'history'
+  const [currentView, setCurrentView] = useState("chat");
+
+  // Track if SettingsModal is open
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   // Active chat session ID. Null represents starting screen (LandingScreen)
   const [activeChatId, setActiveChatId] = useState(null);
   
@@ -22,19 +33,48 @@ function App() {
   const handleNewChat = () => {
     setActiveChatId(null);
     setCurrentPrompt("");
+    setCurrentView("chat"); // Return to chat view if in profile/history
   };
 
   const handleSelectChat = (chatId) => {
     setActiveChatId(chatId);
+    setCurrentPrompt("");
+    setCurrentView("chat"); // Return to chat view to see conversation
   };
 
   const handleSubmitPrompt = (promptText) => {
     console.log("Starting chat with prompt:", promptText);
     setCurrentPrompt(promptText);
-    // Simulate starting a chat session. In subsequent turns, this will transition
-    // into rendering the ChatArea component.
     setActiveChatId("demo-chat-id");
+    setCurrentView("chat");
   };
+
+  // Keyboard shortcut listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Check for Ctrl key combos
+      if (e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+          case 'k':
+            e.preventDefault();
+            handleNewChat();
+            break;
+          case 'h':
+            e.preventDefault();
+            setCurrentView("history");
+            break;
+          case 'p':
+            e.preventDefault();
+            setCurrentView("profile");
+            break;
+          default:
+            break;
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className="app-container">
@@ -43,55 +83,34 @@ function App() {
         activeChatId={activeChatId}
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
-        onOpenSettings={() => alert("Settings modal is not implemented yet.")}
-        onOpenProfile={() => alert("Profile view is not implemented yet.")}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenHistory={() => setCurrentView("history")}
+        onOpenProfile={() => setCurrentView("profile")}
       />
 
       {/* 2. Central Main Content Area */}
       <main className="app-main-content">
-        {!activeChatId ? (
+        {currentView === "profile" ? (
+          <ProfilePage onClose={() => setCurrentView("chat")} />
+        ) : currentView === "history" ? (
+          <HistoryPage onClose={() => setCurrentView("chat")} />
+        ) : !activeChatId ? (
           <LandingScreen onSubmitPrompt={handleSubmitPrompt} />
         ) : (
-          <div style={{ padding: "40px", color: "var(--text-muted)", fontStyle: "italic", textAlign: "center", marginTop: "20vh" }}>
-            <h2>Chat Area Placeholder</h2>
-            <p style={{ marginTop: "12px" }}>
-              Active Session: <strong>{activeChatId}</strong>
-            </p>
-            <p style={{ marginTop: "8px" }}>
-              Initial Prompt Submitted: <em>"{currentPrompt}"</em>
-            </p>
-            <button
-              onClick={handleNewChat}
-              style={{
-                marginTop: "24px",
-                padding: "10px 20px",
-                borderRadius: "var(--radius-sm)",
-                background: "var(--accent)",
-                border: "none",
-                cursor: "pointer",
-                color: "white",
-                fontWeight: 600,
-                boxShadow: "0 4px 12px rgba(76, 125, 255, 0.2)"
-              }}
-            >
-              Back to Landing Screen
-            </button>
-          </div>
+          <ChatArea initialPrompt={currentPrompt} onBackToLanding={handleNewChat} />
         )}
       </main>
 
-      {/* 3. Right Sidebar - Learning Dashboard Placeholder */}
+      {/* 3. Right Sidebar - Learning Dashboard */}
       <aside className="app-right-sidebar">
-        <div style={{ padding: "32px 24px" }}>
-          <h3 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "16px", letterSpacing: "-0.01em" }}>
-            Learning Dashboard
-          </h3>
-          <p style={{ fontSize: "0.88rem", color: "var(--text-muted)", lineHeight: 1.5 }}>
-            This sidebar will contain progress statistics, problem-solving streaks, 
-            difficulty breakdown, and most used data structures.
-          </p>
-        </div>
+        <LearningDashboard />
       </aside>
+
+      {/* 4. Global Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 }
