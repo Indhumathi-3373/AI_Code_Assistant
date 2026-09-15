@@ -46,8 +46,11 @@ public class HistoryController {
      */
     @GetMapping("/search")
     public ResponseEntity<List<Conversation>> searchConversations(@RequestParam String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return ResponseEntity.ok(conversationRepository.findAllByOrderByCreatedAtDesc());
+        }
         List<Conversation> results =
-                conversationRepository.findByTopicContainingIgnoreCaseOrderByCreatedAtDesc(keyword);
+                conversationRepository.findByTopicContainingIgnoreCaseOrderByCreatedAtDesc(keyword.trim());
         return ResponseEntity.ok(results);
     }
 
@@ -81,7 +84,7 @@ public class HistoryController {
                     conversation.setPinned(!conversation.isPinned());
                     return ResponseEntity.ok(conversationRepository.save(conversation));
                 })
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.<Conversation>notFound().build());
     }
 
     /**
@@ -96,11 +99,16 @@ public class HistoryController {
     public ResponseEntity<Conversation> renameConversation(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
+        String topic = body.get("topic");
+        if (topic == null || topic.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         return conversationRepository.findById(id)
                 .map(conversation -> {
-                    conversation.setTopic(body.get("topic"));
+                    conversation.setTopic(topic.trim());
                     return ResponseEntity.ok(conversationRepository.save(conversation));
                 })
-                .orElse(ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

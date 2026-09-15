@@ -7,6 +7,7 @@ import com.codementor.backend.repository.ConversationRepository;
 import com.codementor.backend.service.OpenAiService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 /**
  * ChatController
@@ -29,18 +30,15 @@ public class ChatController {
     }
 
     @PostMapping
-    public ResponseEntity<ChatResponse> getChatResponse(@RequestBody ChatRequest request) {
-        if (request.getPrompt() == null || request.getPrompt().trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        ChatResponse response = openAiService.getCodeMentorResponse(request.getPrompt());
+    public ResponseEntity<ChatResponse> getChatResponse(@Valid @RequestBody ChatRequest request) {
+        String prompt = request.getPrompt().trim();
+        ChatResponse response = openAiService.getCodeMentorResponse(prompt);
 
         // Persist the conversation to H2 for history tracking
         Conversation conversation = Conversation.builder()
                 .topic(response.getTopic())
                 .difficulty(response.getDifficulty())
-                .promptText(request.getPrompt())
+                .promptText(prompt)
                 .build();
         conversationRepository.save(conversation);
 

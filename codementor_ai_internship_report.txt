@@ -1,0 +1,384 @@
+SUMMER INTERNSHIP REPORT
+ON
+CODEMENTOR AI: AN INTERACTIVE DSA LEARNING PLATFORM WITH SPRING BOOT AND REACT
+
+Submitted in partial fulfillment of the requirements for the award of the degree of
+BACHELOR OF ENGINEERING IN COMPUTER SCIENCE AND ENGINEERING
+
+Submitted by
+STUDENT NAME
+Register Number: 1234567890
+
+DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
+ANNA UNIVERSITY AFFILIATED COLLEGE
+TAMIL NADU, INDIA
+JULY 2026
+
+
+TABLE OF CONTENTS
+
+Chapter 1: INTRODUCTION
+1.1 Project Overview and Purpose
+1.2 Objectives of the Internship
+1.3 Scope of the System
+
+Chapter 2: STUDY OR SURVEY
+2.1 Existing Systems Literature Review
+2.2 Limitations of the Existing System
+2.3 Proposed System Architecture Advantages
+
+Chapter 3: SYSTEM ANALYSIS
+3.1 Feasibility Study
+3.2 Software Requirements Specification (SRS)
+3.3 Unified Modeling Language (UML) Diagrams
+
+Chapter 4: SYSTEM SPECIFICATION
+4.1 Hardware Requirements
+4.2 Software Requirements
+
+Chapter 5: SYSTEM ENVIRONMENT
+5.1 Java and Spring Boot Framework
+5.2 PostgreSQL and Hibernate ORM
+5.3 React.js and Vite Build Environment
+
+Chapter 6: IMPLEMENTATION
+6.1 Authentication and Security Module (JWT)
+6.2 8-Step Interactive Chat Module
+6.3 Conversation Archive and History Module
+6.4 Performance and Profile Module
+6.5 Database Schema Design
+
+Chapter 7: TESTING
+7.1 Testing Methodologies Applied
+7.2 Test Cases Table
+
+Chapter 8: CONCLUSION
+8.1 Project Summary
+8.2 Future Scope and Enhancements
+
+Chapter 9: SCREENSHOTS AND CERTIFICATE
+9.1 Interface Walkthrough Descriptions
+9.2 Internship Completion Certificate Placeholder
+
+
+CHAPTER 1: INTRODUCTION
+
+1.1 PROJECT OVERVIEW AND PURPOSE
+
+In the modern software engineering landscape, recruitment processes for product-based technology companies heavily evaluate candidates on Data Structures, Algorithms (DSA), and analytical problem-solving. Computer science undergraduates frequently face a significant learning gap when transitioning from dry academic textbooks to complex, fast-paced technical coding interviews. Traditional methods of learning include writing code in compilers, reading documentation, and solving mock questions in environments that lack structured, interactive mentorship.
+
+This summer internship project presents CodeMentor AI, an interactive web-based AI coding assistant custom-designed to bridge this gap. CodeMentor AI is built using a modern full-stack web architecture leveraging a React frontend client and a Java Spring Boot backend server. The backend securely connects to the OpenAI API (utilizing GPT-4o mini via JSON schema response mode) to act as a simulated expert interviewer.
+
+Instead of presenting flat, text-based solution codes immediately, the system provides students with an 8-stage interactive learning sequence. This structure allows students to progressively understand constraints, formulate brute force ideas, receive hints, examine optimized Java code, debug failures, review related core interview questions, and summarize key data structures lessons.
+
+
+1.2 OBJECTIVES OF THE INTERNSHIP
+
+The primary objectives achieved during the course of this summer internship project include:
+
+1. Designing and developing a responsive, minimal, dark-themed user interface in React.js that complies with modern visual web standards, utilizing glassmorphic panels, gradient badges, and layout collapse controls.
+2. Constructing a scalable backend REST API using Java 17/21 and Spring Boot (Spring Web MVC) that handles request routing, data processing, and communication with external artificial intelligence interfaces.
+3. Implementing robust application security using Spring Security and JWT (JSON Web Tokens) to authenticate users, manage authorization filters, encrypt credentials using BCrypt, and establish stateless API request validation.
+4. Integrating JPA (Java Persistence API) and Hibernate ORM for mapping database entities and managing transactions dynamically with PostgreSQL as a persistent database store.
+5. Implementing a conversational history logging system that captures, pins, renames, and deletes session state securely without introducing memory leaks or excessive payload sizes.
+
+
+1.3 SCOPE OF THE SYSTEM
+
+The scope of CodeMentor AI focuses on creating a reliable, localized development and testing platform for DSA learners. The frontend web UI is structured as a three-column dashboard: the collapsible left sidebar manages active chat sessions and page transitions; the center panel serves as the main content viewport hosting the landing screens, chat consoles, history management panels, or user profiles; the right sidebar displays statistics, streak counts, solved task categories, and activity logs.
+
+The backend server handles input sanitization, validates token headers using a Custom once-per-request filter, delegates structured prompt payloads to the OpenAI completions endpoint using RestTemplate, maps JSON responses directly to specific DTO objects, and commits transactions to a PostgreSQL relational database. The platform is bounded to local deployment, acting as a modular template that can easily scale to containerized production hosts using Docker and Kubernetes.
+
+
+CHAPTER 2: STUDY OR SURVEY
+
+2.1 EXISTING SYSTEMS LITERATURE REVIEW
+
+An inspection of currently available platforms for DSA practice reveals several popular tools, each with distinct advantages and disadvantages:
+
+1. Online Evaluators (e.g., LeetCode, HackerRank):
+These platforms excel at grading code correctness through automated test suite runs. However, they are highly transactional. If a student gets stuck on a dynamic programming problem, the platform does not guide the student through conceptual steps. Students are forced to look at discussion forums or solutions, which often results in copy-pasting code without acquiring true intuition.
+
+2. General Purpose LLMs (e.g., ChatGPT, Claude):
+General purpose AI platforms can explain code concepts conversationally. However, their outputs are unstructured and highly variable. One prompt might yield a complete optimized solution directly, while the next might provide a brief, text-only hint. For DSA prep, this unstructured format is counter-productive because students require a step-by-step interview-mimicking flow to build logic.
+
+3. Static Educational Portals (e.g., GeeksforGeeks, Tutorialspoint):
+These portals offer excellent reference articles containing code snippets across various languages. Yet, they lack personalization. The student cannot interact with the code, modify inputs to observe output changes, or get tailored hints based on their specific logic mistakes.
+
+
+2.2 LIMITATIONS OF THE EXISTING SYSTEM
+
+The critical drawbacks of existing systems can be summarized as:
+
+1. Lacking Guided Tutoring: Most platforms provide the full solution immediately, preventing the candidate from building the code step-by-step (e.g., analyzing brute force complexity first).
+2. Absence of Progress and Streak Dashboards: Generic LLMs do not keep track of specific problem categories solved by the user, nor do they record user milestones.
+3. No Session Persistence: Casual web-based compiler prompts do not persist conversations or let users search and filter history under a secure account.
+4. Unsecured endpoints: Simple AI wrapper backends often lack standard authentication protocols like JWT, exposing API keys to leaks or massive abuse.
+
+
+2.3 PROPOSED SYSTEM ARCHITECTURE ADVANTAGES
+
+CodeMentor AI addresses these deficiencies by establishing a structured, secure, and persistent workspace. The system enforces an 8-stage interactive response sequence:
+Stage 1: Problem Understanding - Clarifies input bounds, corner cases, and constraints.
+Stage 2: Brute Force Concept - Formulates the simplest working solution.
+Stage 3: Think Before Optimize - Asks conceptual questions to prompt optimization.
+Stage 4: Hints - Provides targeted hints without revealing code.
+Stage 5: Optimal Java Code - Presents fully commented, clean Java code blocks.
+Stage 6: Debugging Challenge - Asks questions on edge cases or code walk-throughs.
+Stage 7: Q and A FAQ - Curated list of alternative approaches and interview questions.
+Stage 8: Learning Summary - Recap of data structures and patterns applied.
+
+By wrapping these conceptual steps in visual accordion elements in the UI, students are encouraged to "Think before they look." Security is ensured by hashing credentials using BCrypt and validating API routes with Spring Security. The integration of PostgreSQL ensures that user progress, streaks, profiles, and histories are securely saved and can be searched or filtered on-demand.
+
+
+CHAPTER 3: SYSTEM ANALYSIS
+
+3.1 FEASIBILITY STUDY
+
+Before undertaking the implementation, a three-way feasibility analysis was conducted to ensure project viability:
+
+1. Technical Feasibility: The technology stack (React, Java 17/21, Spring Boot, Spring Security, JPA, PostgreSQL) represents mature, widely supported environments. Integration with the OpenAI API is achieved using standard HTTP client calls (RestTemplate) and Jackson JSON deserializers. Developing the frontend using Vite guarantees fast builds and hot module replacement. Therefore, the project is technically feasible.
+
+2. Economic Feasibility: The development environment uses open-source software, including PostgreSQL database server, Node.js, and Java OpenJDK. The only operational cost involves the OpenAI completions API billing. Since the platform utilizes the cost-efficient "gpt-4o-mini" model, API costs per query are fractions of a cent, making the platform highly cost-effective and economically viable.
+
+3. Operational Feasibility: The system is designed to run in standard modern web browsers. The minimal dark-themed interface mimics tools that computer science students already use daily. The application requires zero installation on the user's local machine, ensuring high user adoption and simple operational deployment.
+
+
+3.2 SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
+
+3.2.1 Functional Requirements
+
+1. User Account Management: Users must be able to register accounts and log in securely. The system must issue a JWT token upon successful authentication.
+2. Interactive DSA Mentor: The chat interface must submit user queries to the backend and render responses in 8 distinct collapsible sections.
+3. Code Manipulation: The UI must render Java code syntax highlighting and provide copy-to-clipboard and source-code-download triggers.
+4. Conversation History: The application must fetch, search, pin, rename, and delete conversation history cards using RESTful endpoints.
+5. Performance Dashboard: The user profile must track active streaks, milestone badges, difficulty distribution, and GitHub-style activity charts.
+
+3.2.2 Non-Functional Requirements
+
+1. Security: All passwords must be hashed using BCrypt. Stateless APIs must require a valid Authorization Header with a Bearer Token.
+2. Performance: The application must render local transitions instantly, and AI skeleton loaders must pulse during remote data fetches.
+3. Reliability: If the backend database or AI API is unreachable, the system must fail-safe to mock data options to preserve usability.
+4. Responsiveness: The visual layout must collapse to a single column format on mobile viewports.
+
+
+3.3 UML DIAGRAMS
+
+Use Case Model:
+The system actor "User" interacts with the frontend client. The client triggers AuthController for registration and login operations. Once authorized, the user triggers ChatController to start DSA mentoring sessions, and HistoryController to load, rename, pin, or delete conversation archives.
+
+Class Structure:
+The class structure defines a User entity containing credential strings and role attributes. The User maps to a UserProfile tracking streaking integers and problem-solving collections. The Conversation entity models stored logs containing topic strings, difficulty classifications, raw prompt texts, pin flags, and message counters.
+
+Sequence Flow:
+1. User enters prompt in React UI.
+2. Client forwards a POST request to /api/chat containing Bearer tokens in headers.
+3. Security Filter interceptor validates token signatures.
+4. ChatController passes prompts to OpenAiService.
+5. OpenAiService queries the Completions endpoint using configured templates.
+6. Received completions are parsed into ChatResponse entities, committed to PostgreSQL, and sent back as HTTP 200 payloads.
+7. Client renders the 8 learning accordions.
+
+
+CHAPTER 4: SYSTEM SPECIFICATION
+
+4.1 HARDWARE REQUIREMENTS
+
+The physical environment required to develop, compile, host, and access the CodeMentor AI system includes:
+
+1. Processor (CPU): Dual-Core Intel Core i5 or AMD Ryzen 5 processor operating at a minimum frequency of 2.4 GHz. A Quad-Core processor is recommended for running the React Vite server, PostgreSQL service, and Spring Boot application concurrently.
+2. System Memory (RAM): Minimum 8 GB DDR4 RAM. 16 GB is recommended to support IntelliJ IDEA/VS Code IDEs and local PostgreSQL database instances without system throttling.
+3. Storage Space: Solid State Drive (SSD) with at least 10 GB of free space for application source files, node modules dependencies, Maven repository caches, and local PostgreSQL database records.
+4. Internet Connection: Standard broadband connection to communicate with the remote OpenAI completions endpoint and pull package dependencies via Maven Central and npm.
+
+
+4.2 SOFTWARE REQUIREMENTS
+
+The operating environments, software runtimes, build utilities, and code compilers utilized to construct the system are detailed below:
+
+1. Operating System: Microsoft Windows 10/11 (64-bit), Linux (Ubuntu 20.04 LTS or higher), or macOS (Big Sur or higher).
+2. Java Development Kit (JDK): Oracle OpenJDK 17 or Java 21 runtime environments.
+3. Database Management System: PostgreSQL 15 or higher relational database server.
+4. NodeJS Runtime: Node.js version 18.x or 20.x LTS with NPM package manager.
+5. Build Tooling: Apache Maven 3.8.x for Java backend compiling.
+6. Integrated Development Environment (IDE): JetBrains IntelliJ IDEA for Java development, and Microsoft Visual Studio Code for React/CSS styling.
+
+
+CHAPTER 5: SYSTEM ENVIRONMENT
+
+5.1 JAVA AND SPRING BOOT FRAMEWORK
+
+Java is chosen as the core backend programming language due to its type safety, platform independence, robust memory management, and extensive enterprise framework support. Spring Boot is an extension of the Spring framework that eliminates boilerplate XML configurations, introducing starter dependencies and embedded runtime servers (such as Tomcat) to allow developers to build production-grade standalone applications instantly.
+
+In CodeMentor AI, Spring Boot leverages Spring Web MVC to handle RESTful endpoint routing, mapping incoming HTTP POST requests containing prompts to Java DTO beans using the Jackson serialization library. It also coordinates dependency injection, binding service singletons such as "OpenAiService" to REST controllers like "ChatController" and "HistoryController" dynamically.
+
+
+5.2 POSTGRESQL AND HIBERNATE ORM
+
+PostgreSQL is a highly reliable relational database system. It supports relational integrity and concurrent transaction management. Hibernate is an Object-Relational Mapping (ORM) framework that acts as a bridge between the object-oriented Java classes and the relational PostgreSQL tables.
+
+In this project, Hibernate automatically handles table creations and schema updates from entity class annotations. Spring Data JPA simplifies repository implementation by automatically generating SQL queries from method declarations, reducing the need to write complex SQL statements.
+
+
+5.3 REACT.JS AND VITE BUILD ENVIRONMENT
+
+React.js is a component-based JavaScript library developed by Meta for building interactive user interfaces. It uses a Virtual DOM to compute UI diffs and re-render components efficiently when states change.
+
+In CodeMentor AI, React manages visual states like collapsible sections, active views, user input fields, and asynchronous loading states. Vite is used as the frontend build tool. Vite utilizes native ES modules (ESM) to serve source files during development, ensuring fast hot module replacement (HMR) and compiling highly optimized assets for production in seconds.
+
+
+CHAPTER 6: IMPLEMENTATION
+
+6.1 AUTHENTICATION AND SECURITY MODULE (JWT)
+
+Authentication uses Spring Security filters with stateless token generation:
+The User model defines the DB representation with encrypted password storage. The AuthController handles register and login endpoints, generating a token using the Jwts builder package with a key derived from decoders. An interceptor filter parses Authorization headers, checks Bearer prefix states, validates token signatures, and injects authenticated principal contexts into Spring Security configurations.
+
+
+6.2 8-STEP INTERACTIVE CHAT MODULE
+
+The Chat interface uses structural JSON completion configurations to feed details to the client accordion views. The OpenAI completable prompt commands the model to output JSON structures containing specific fields matching Java ChatResponse DTO definitions. This ensures clean structural parsing. If connection errors arise, the React UI uses a fail-safe configuration load of mock card data so usability is preserved.
+
+
+6.3 CONVERSATION ARCHIVE AND HISTORY MODULE
+
+History logs are requested on mount from the /api/history endpoint. The UI displays searchable list panels. Each conversation card triggers state updates:
+- Pin toggles trigger PATCH requests to /api/history/{id}/pin.
+- Renames trigger PATCH requests to /api/history/{id}/rename.
+- Deletions trigger DELETE requests to /api/history/{id}, updating the client view state.
+
+
+6.4 PERFORMANCE AND PROFILE MODULE
+
+The profile module gamifies DSA practice. It plots streaking counters, XP badges, difficulty counts, and contribution calendar grids. React dynamically updates these elements from the user profile service, rewarding consistency and providing a visual breakdown of completed Easy, Medium, and Hard milestones.
+
+
+6.5 DATABASE SCHEMA DESIGN
+
+DDL table definitions in PostgreSQL:
+
+Users Table:
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) DEFAULT 'ROLE_USER'
+);
+
+Conversations Table:
+CREATE TABLE conversations (
+    id BIGSERIAL PRIMARY KEY,
+    topic VARCHAR(100) NOT NULL,
+    difficulty VARCHAR(20),
+    prompt_text VARCHAR(2000),
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    is_pinned BOOLEAN DEFAULT FALSE,
+    message_count INTEGER DEFAULT 1
+);
+
+
+CHAPTER 7: TESTING
+
+7.1 TESTING METHODOLOGIES APPLIED
+
+The testing methodologies applied to the system include:
+1. Unit Testing: Done using JUnit 5 and Mockito to mock RestTemplate responses, verifying JSON parsing and exception mappings.
+2. Integration Testing: Validates full database transaction scopes and REST path outputs.
+3. Security Testing: Confirms that accessing locked routes without a valid JWT token yields HTTP 403 Forbidden errors.
+
+
+7.2 TEST CASES TABLE
+
+Test Case 1: Register User
+- Module: Auth
+- Input: Register unique username, email, and password.
+- Expected Output: HTTP 200: "User registered successfully!"
+- Actual Result: Returned 200 OK.
+- Status: PASS
+
+Test Case 2: Register Duplicate User
+- Module: Auth
+- Input: Register with an existing email.
+- Expected Output: HTTP 400: "Error: Email is already in use!"
+- Actual Result: Returned 400 Bad Request.
+- Status: PASS
+
+Test Case 3: Unauthorized Access
+- Module: Security
+- Input: Access `/api/history` without token.
+- Expected Output: HTTP 403 Forbidden.
+- Actual Result: Returned 403.
+- Status: PASS
+
+Test Case 4: Blank Chat Prompt
+- Module: Chat
+- Input: Submit empty string prompt.
+- Expected Output: HTTP 400 Bad Request.
+- Actual Result: Returned 400.
+- Status: PASS
+
+Test Case 5: Valid DSA Prompt
+- Module: Chat
+- Input: Submit "Two Sum in Java".
+- Expected Output: HTTP 200 with 8-Stage JSON response.
+- Actual Result: Returned 200 OK with DTO structure.
+- Status: PASS
+
+Test Case 6: Toggle Pin Status
+- Module: History
+- Input: PATCH `/api/history/{id}/pin`.
+- Expected Output: HTTP 200 with updated pin status.
+- Actual Result: Pin toggled successfully.
+- Status: PASS
+
+Test Case 7: Delete Conversation
+- Module: History
+- Input: DELETE `/api/history/{id}`.
+- Expected Output: HTTP 204 No Content.
+- Actual Result: Returned 204.
+- Status: PASS
+
+Test Case 8: Search Conversation
+- Module: History
+- Input: Search "BST" keyword.
+- Expected Output: HTTP 200 with filtered items.
+- Actual Result: Returned 200 with filtered list.
+- Status: PASS
+
+
+CHAPTER 8: CONCLUSION
+
+8.1 PROJECT SUMMARY
+
+CodeMentor AI was successfully designed, developed, compiled, and tested during the summer internship. Using Spring Boot and React web components, the system guides students through coding interviews with custom 8-stage interactive roadmaps. By integrating Spring Security and JWT, user credentials and AI endpoints remain fully protected, and PostgreSQL database integration ensures stable data persistence.
+
+
+8.2 FUTURE SCOPE AND ENHANCEMENTS
+
+While the current version of CodeMentor AI is fully functional, several enhancements can be integrated in future phases:
+1. Embedded Compiler sandbox: Adding a safe execution runtime (using WebAssembly or isolated Docker environments) to allow students to execute code directly inside the web browser.
+2. Voice Mock Interviews: Integrating speech-to-text and text-to-speech features.
+3. Resume Parsing: Giving customized suggestions based on candidates' uploaded profiles.
+
+
+CHAPTER 9: SCREENSHOTS AND CERTIFICATE
+
+9.1 INTERFACE WALKTHROUGH DESCRIPTIONS
+
+This chapter outlines the key interfaces developed for the CodeMentor AI system. Users can navigate through these screens dynamically:
+1. Landing Dashboard: A clean interface containing suggested prompt cards. The center panel has an auto-resizing text prompt box with attachment buttons.
+2. Asynchronous Learning Console (ChatArea): Displays user messages and AI cards. During processing, a pulsing loader block is shown. Once ready, the 8 steps are displayed in collapsible accordion panels.
+3. History Archive Manager: Contains search fields, filter category chips (All, Today, Pinned), and conversation cards. Users can pin, rename, or delete records.
+4. User Profile Page: Features streaks, unlocked milestone badges, and a practice grid representing activity history.
+
+
+9.2 INTERNSHIP COMPLETION CERTIFICATE PLACEHOLDER
+
+CERTIFICATE OF COMPLETION
+This certificate is proudly presented to: STUDENT NAME
+For successfully completing a summer internship project on "CodeMentor AI Development" from June 2026 to July 2026.
+During this tenure, the candidate demonstrated excellence in Java, Spring Boot, Spring Security, React.js, and PostgreSQL database management.
+
+Project Guide: SIGNATURE
+External Examiner: SIGNATURE

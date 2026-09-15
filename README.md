@@ -1,18 +1,40 @@
-# React + Vite
+# CodeMentor AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CodeMentor AI is a React learning workspace backed by Spring Boot. It explains Java and DSA prompts through an OpenAI-powered chat flow and saves completed responses in conversation history.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Install Java 17 and Node.js 20 or newer.
+2. Set an OpenAI API key in the terminal that will run the backend:
 
-## React Compiler
+   ```powershell
+   $env:OPENAI_API_KEY = "your-key"
+   ```
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+3. Start the backend:
 
-Note: This will impact Vite dev & build performances.
+   ```powershell
+   cd backend
+   .\mvnw.cmd spring-boot:run
+   ```
 
-## Expanding the ESLint configuration
+4. In a second terminal, start the frontend:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+   ```powershell
+   npm.cmd install
+   npm.cmd run dev
+   ```
+
+Open `http://localhost:5173`. The API runs at `http://localhost:8080`; Swagger is at `/swagger-ui.html` and the local H2 console is at `/h2-console`.
+
+The default database is a persistent local H2 file under `backend/data`. To use PostgreSQL, set `SPRING_PROFILES_ACTIVE=postgres` plus `DATABASE_URL`, `DATABASE_USERNAME`, and `DATABASE_PASSWORD` before starting the backend.
+
+## API endpoints
+
+- `POST /api/chat` — sends `{ "prompt": "..." }` and saves a conversation after a successful AI response.
+- `GET /api/history`, `GET /api/history/search?keyword=...`
+- `PATCH /api/history/{id}/pin`, `PATCH /api/history/{id}/rename`
+- `DELETE /api/history/{id}`
+- `POST /api/auth/register`, `POST /api/auth/login`
+
+For local UI development, chat and history endpoints are available without a token because the current UI has no sign-in screen. Set `SECURITY_REQUIRE_AUTH=true` only after adding JWT handling in the frontend.

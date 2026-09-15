@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Summer Internship Report - CodeMentor AI</title>
+    <style>
+        /* Times New Roman styling as per Anna University standards */
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 8.5in;
+            margin: 0 auto;
+            padding: 1in;
+            box-sizing: border-box;
+        }
+
+        /* Heading Styles */
+        h1 {
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 24px;
+            page-break-before: always;
+        }
+
+        h1.first-title {
+            page-break-before: avoid;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            text-align: left;
+        }
+
+        /* Paragraph & Layout */
+        p {
+            text-align: justify;
+            text-indent: 0.5in;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .no-indent {
+            text-indent: 0;
+        }
+
+        ul, ol {
+            margin-top: 0;
+            margin-bottom: 16px;
+            padding-left: 0.5in;
+        }
+
+        li {
+            text-align: justify;
+            margin-bottom: 8px;
+        }
+
+        /* Cover Page Styling */
+        .cover-page {
+            height: 10.5in;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            page-break-after: always;
+            box-sizing: border-box;
+            padding: 0.5in 0;
+        }
+
+        .cover-title {
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        .cover-subtitle {
+            font-size: 13pt;
+            font-weight: normal;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .cover-submitted {
+            margin-top: 80px;
+            font-size: 12pt;
+        }
+
+        .cover-student {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .cover-college {
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            margin-bottom: 24px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 11pt;
+        }
+
+        th {
+            font-weight: bold;
+            text-transform: uppercase;
+            background-color: #f2f2f2;
+        }
+
+        /* Code display block */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 12px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 9.5pt;
+            white-space: pre-wrap;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            text-indent: 0;
+        }
+
+        /* Diagrams */
+        .diagram-box {
+            border: 1px solid #000;
+            padding: 15px;
+            background: #fafafa;
+            font-family: monospace;
+            font-size: 10pt;
+            white-space: pre;
+            margin: 20px 0;
+            overflow-x: auto;
+            line-height: 1.3;
+            text-indent: 0;
+        }
+
+        /* Page Numbering Rules for Print */
+        @media print {
+            @page {
+                size: A4;
+                margin: 1in;
+            }
+            
+            body {
+                background-color: #fff;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            /* Native CSS page numbering footer */
+            .page-footer {
+                position: fixed;
+                bottom: 0.2in;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-family: "Times New Roman", Times, serif;
+                font-size: 12pt;
+            }
+        }
+
+        /* Web view helpers */
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .print-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn no-print" onclick="window.print()">Print Report / Save to PDF</button>
+
+    <div class="container">
+
+        <!-- ==================== COVER PAGE ==================== -->
+        <div class="cover-page">
+            <div>
+                <div class="cover-title">A SUMMER INTERNSHIP REPORT</div>
+                <div class="cover-subtitle">ON</div>
+                <div class="cover-title" style="margin-top: 10px;">CODEMENTOR AI: AN INTERACTIVE DSA LEARNING PLATFORM WITH SPRING BOOT AND REACT</div>
+            </div>
+
+            <div class="cover-submitted">
+                <p class="no-indent" style="text-align: center; font-style: italic; margin-bottom: 20px;">
+                    A Summer Internship Report submitted in partial fulfillment of the<br>
+                    requirements for the award of the degree of
+                </p>
+                <div class="cover-title" style="font-size: 13pt;">BACHELOR OF ENGINEERING</div>
+                <p class="no-indent" style="text-align: center; font-style: italic; margin-top: 5px;">in</p>
+                <div class="cover-title" style="font-size: 13pt; margin-top: 5px;">COMPUTER SCIENCE AND ENGINEERING</div>
+            </div>
+
+            <div>
+                <p class="no-indent" style="text-align: center; margin-bottom: 5px;">Submitted by</p>
+                <div class="cover-student">STUDENT NAME</div>
+                <p class="no-indent" style="text-align: center; font-size: 11pt; margin-top: 2px;">(Reg. No. 1234567890)</p>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <p class="no-indent" style="text-align: center; margin-bottom: 20px; font-weight: bold;">
+                    DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
+                </p>
+                <div class="cover-college">ANNA UNIVERSITY AFFILIATED COLLEGE</div>
+                <p class="no-indent" style="text-align: center; font-size: 12pt; margin-top: 5px; font-weight: bold;">
+                    TAMIL NADU, INDIA
+                </p>
+                <p class="no-indent" style="text-align: center; font-size: 12pt; margin-top: 5px;">
+                    JULY 2026
+                </p>
+            </div>
+        </div>
+
+
+        <!-- ==================== TABLE OF CONTENTS ==================== -->
+        <div class="page-break">
+            <h1 class="first-title">TABLE OF CONTENTS</h1>
+            <table style="border: none; margin-top: 30px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #000; background: transparent;">
+                        <th style="border: none; background: transparent; text-align: left;">Chapter No.</th>
+                        <th style="border: none; background: transparent; text-align: left;">Title</th>
+                        <th style="border: none; background: transparent; text-align: right;">Page No.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border: none;">
+                        <td style="border: none; font-weight: bold;">1</td>
+                        <td style="border: none; font-weight: bold;">INTRODUCTION</td>
+                        <td style="border: none; text-align: right; font-weight: bold;">1</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">1.1 Project Overview & Purpose</td>
+                        <td style="border: none; text-align: right;">1</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">1.2 Objectives of the Internship</td>
+                        <td style="border: none; text-align: right;">2</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">1.3 Scope of the System</td>
+                        <td style="border: none; text-align: right;">3</td>
+                    </tr>
+                    
+                    <tr style="border: none;">
+                        <td style="border: none; font-weight: bold;">2</td>
+                        <td style="border: none; font-weight: bold;">STUDY OR SURVEY</td>
+                        <td style="border: none; text-align: right; font-weight: bold;">5</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">2.1 Existing Systems Literature Review</td>
+                        <td style="border: none; text-align: right;">5</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">2.2 Limitations of the Existing System</td>
+                        <td style="border: none; text-align: right;">6</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">2.3 Proposed System Architecture Advantages</td>
+                        <td style="border: none; text-align: right;">7</td>
+                    </tr>
+                    
+                    <tr style="border: none;">
+                        <td style="border: none; font-weight: bold;">3</td>
+                        <td style="border: none; font-weight: bold;">SYSTEM ANALYSIS</td>
+                        <td style="border: none; text-align: right; font-weight: bold;">9</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">3.1 Feasibility Study</td>
+                        <td style="border: none; text-align: right;">9</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">3.2 Software Requirements Specification (SRS)</td>
+                        <td style="border: none; text-align: right;">10</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">3.3 UML Diagrams (Use Case, Class, Sequence, ERD)</td>
+                        <td style="border: none; text-align: right;">12</td>
+                    </tr>
+                    
+                    <tr style="border: none;">
+                        <td style="border: none; font-weight: bold;">4</td>
+                        <td style="border: none; font-weight: bold;">SYSTEM SPECIFICATION</td>
+                        <td style="border: none; text-align: right; font-weight: bold;">16</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">4.1 Hardware Requirements</td>
+                        <td style="border: none; text-align: right;">16</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">4.2 Software Requirements</td>
+                        <td style="border: none; text-align: right;">17</td>
+                    </tr>
+                    
+                    <tr style="border: none;">
+                        <td style="border: none; font-weight: bold;">5</td>
+                        <td style="border: none; font-weight: bold;">SYSTEM ENVIRONMENT</td>
+                        <td style="border: none; text-align: right; font-weight: bold;">19</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">5.1 Java & Spring Boot Framework</td>
+                        <td style="border: none; text-align: right;">19</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">5.2 PostgreSQL & Hibernate ORM</td>
+                        <td style="border: none; text-align: right;">21</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">5.3 React.js & Vite Build Environment</td>
+                        <td style="border: none; text-align: right;">22</td>
+                    </tr>
+                    
+                    <tr style="border: none;">
+                        <td style="border: none; font-weight: bold;">6</td>
+                        <td style="border: none; font-weight: bold;">IMPLEMENTATION</td>
+                        <td style="border: none; text-align: right; font-weight: bold;">24</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">6.1 Authentication & Security Module (JWT)</td>
+                        <td style="border: none; text-align: right;">24</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">6.2 8-Step Interactive Chat Module</td>
+                        <td style="border: none; text-align: right;">26</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">6.3 Conversation Archive & History Module</td>
+                        <td style="border: none; text-align: right;">28</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">6.4 Performance & Profile Module</td>
+                        <td style="border: none; text-align: right;">29</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">6.5 Database Schema Design</td>
+                        <td style="border: none; text-align: right;">31</td>
+                    </tr>
+                    
+                    <tr style="border: none;">
+                        <td style="border: none; font-weight: bold;">7</td>
+                        <td style="border: none; font-weight: bold;">TESTING</td>
+                        <td style="border: none; text-align: right; font-weight: bold;">33</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">7.1 Testing Methodologies Applied</td>
+                        <td style="border: none; text-align: right;">33</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">7.2 Test Cases Table</td>
+                        <td style="border: none; text-align: right;">35</td>
+                    </tr>
+                    
+                    <tr style="border: none;">
+                        <td style="border: none; font-weight: bold;">8</td>
+                        <td style="border: none; font-weight: bold;">CONCLUSION</td>
+                        <td style="border: none; text-align: right; font-weight: bold;">38</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">8.1 Project Summary</td>
+                        <td style="border: none; text-align: right;">38</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <td style="border: none;"></td>
+                        <td style="border: none; padding-left: 20px;">8.2 Future Scope & Enhancements</td>
+                        <td style="border: none; text-align: right;">39</td>
+                    </tr>
+                    
+                    <tr style="border: none;">
+                        <td style="border: none; font-weight: bold;">9</td>
+                        <td style="border: none; font-weight: bold;">SCREENSHOTS & CERTIFICATE</td>
+                        <td style="border: none; text-align: right; font-weight: bold;">40</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- ==================== CHAPTER 1 ==================== -->
+        <h1 class="first-title">CHAPTER 1<br>INTRODUCTION</h1>
+        
+        <h2>1.1 PROJECT OVERVIEW & PURPOSE</h2>
+        <p>
+            In the modern era of software engineering, technical recruitment processes for product-based tech companies heavily rely on evaluating candidates on Data Structures, Algorithms (DSA), and analytical problem-solving. Computer science undergraduates frequently face a learning gap when transitioning from dry, academic textbooks to complex, fast-paced technical coding interviews. Traditional methods of learning include writing code in compilers, reading documentation, and solving mock questions in environments that lack structured mentorship.
+        </p>
+        <p>
+            This summer internship project presents <strong>CodeMentor AI</strong>, an interactive web-based AI coding assistant custom-designed to bridge this gap. CodeMentor AI is built using a modern full-stack web architecture leveraging a React frontend client and a Java Spring Boot backend server. The backend securely connects to the OpenAI API (utilizing GPT-4o mini via JSON schema response mode) to act as a simulated expert interviewer. The system provides students with an 8-stage interactive learning sequence rather than a flat, text-based solution copy, allowing students to progressively understand constraints, formulate brute force ideas, receive hints, examine optimized Java code, debug failures, review related core interview questions, and summarize key data structures lessons.
+        </p>
+
+        <h2>1.2 OBJECTIVES OF THE INTERNSHIP</h2>
+        <p>
+            The primary objectives achieved during the course of this summer internship project include:
+        </p>
+        <ul>
+            <li>To design and develop a responsive, minimal, dark-themed user interface in React.js that complies with modern visual web standards, utilizing glassmorphic panels, gradient badges, and layout collapse controls.</li>
+            <li>To construct a scalable backend REST API using Java 17 and Spring Boot (Spring Web MVC) that handles request routing, data processing, and communication with external artificial intelligence interfaces.</li>
+            <li>To implement robust application security using Spring Security and JWT (JSON Web Tokens) to authenticate users, manage authorization filters, encrypt credentials using BCrypt, and establish stateless API request validation.</li>
+            <li>To integrate JPA (Java Persistence API) and Hibernate ORM for mapping database entities and managing transactions dynamically with PostgreSQL as a persistent database store.</li>
+            <li>To implement a conversational history logging system that captures, pins, renames, and deletes session state securely without introducing memory leaks or excessive payload sizes.</li>
+        </ul>
+
+        <h2>1.3 SCOPE OF THE SYSTEM</h2>
+        <p>
+            The scope of CodeMentor AI focuses on creating a reliable, localized development and testing platform for DSA learners. The frontend web UI is structured as a three-column dashboard: the collapsible left sidebar manages active chat sessions and page transitions; the center panel serves as the main content viewport hosting the landing screens, chat consoles, history management panels, or user profiles; the right sidebar displays statistics, streak counts, solved task categories, and activity logs. 
+        </p>
+        <p>
+            The backend server handles input sanitization, validates token headers using a Custom once-per-request filter, delegates structured prompt payloads to the OpenAI completions endpoint using RestTemplate, maps JSON responses directly to specific DTO objects, and commits transactions to a PostgreSQL relational database. The platform is bounded to local deployment, acting as a modular template that can easily scale to containerized production hosts using Docker and Kubernetes.
+        </p>
+
+
+        <!-- ==================== CHAPTER 2 ==================== -->
+        <h1>CHAPTER 2<br>STUDY OR SURVEY</h1>
+        
+        <h2>2.1 EXISTING SYSTEMS LITERATURE REVIEW</h2>
+        <p>
+            An inspection of currently available platforms for DSA practice reveals several popular tools, each with distinct advantages and disadvantages:
+        </p>
+        <p class="no-indent">
+            <strong>1. Online Evaluators (e.g., LeetCode, HackerRank):</strong><br>
+            These platforms excel at grading code correctness through automated test suite runs. However, they are highly transactional. If a student gets stuck on a dynamic programming problem, the platform does not guide the student through conceptual steps. Students are forced to look at discussion forums or solutions, which often results in copy-pasting code without acquiring true intuition.
+        </p>
+        <p class="no-indent">
+            <strong>2. General Purpose LLMs (e.g., ChatGPT, Claude):</strong><br>
+            General purpose AI platforms can explain code concepts conversationally. However, their outputs are unstructured and highly variable. One prompt might yield a complete optimized solution directly, while the next might provide a brief, text-only hint. For DSA prep, this unstructured format is counter-productive because students require a step-by-step interview-mimicking flow to build logic.
+        </p>
+        <p class="no-indent">
+            <strong>3. Static Educational Portals (e.g., GeeksforGeeks, Tutorialspoint):</strong><br>
+            These portals offer excellent reference articles containing code snippets across various languages. Yet, they lack personalization. The student cannot interact with the code, modify inputs to observe output changes, or get tailored hints based on their specific logic mistakes.
+        </p>
+
+        <h2>2.2 LIMITATIONS OF THE EXISTING SYSTEM</h2>
+        <p>
+            The critical drawbacks of existing systems can be summarized as:
+        </p>
+        <ul>
+            <li><strong>Lacking Guided Tutoring:</strong> Most platforms provide the full solution immediately, preventing the candidate from building the code step-by-step (e.g., analyzing brute force complexity first).</li>
+            <li><strong>Absence of Progress & Streak Dashboards:</strong> Generic LLMs do not keep track of specific problem categories solved by the user, nor do they record user milestones.</li>
+            <li><strong>No Session Persistence:</strong> Casual web-based compiler prompts do not persist conversations or let users search and filter history under a secure account.</li>
+            <li><strong>Unsecured endpoints:</strong> Simple AI wrapper backends often lack standard authentication protocols like JWT, exposing API keys to leaks or massive abuse.</li>
+        </ul>
+
+        <h2>2.3 PROPOSED SYSTEM ARCHITECTURE ADVANTAGES</h2>
+        <p>
+            CodeMentor AI addresses these deficiencies by establishing a structured, secure, and persistent workspace. The system enforces an 8-stage interactive response sequence:
+        </p>
+        <div class="diagram-box">
+┌─────────────────────────────────────────────────────────────────────────┐
+│              Proposed 8-Stage DSA Guided Learning Cycle                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│ [1. Understand] ➔ [2. Brute Force] ➔ [3. Optimize Concept] ➔ [4. Hint]  │
+│                                                                         │
+│ [8. Summary]    ◄─ [7. Q&A FAQ]    ◄─ [6. Debugging] ◄─ [5. Optimal Code]│
+└─────────────────────────────────────────────────────────────────────────┘</div>
+        <p>
+            By wrapping these conceptual steps in visual accordion elements in the UI, students are encouraged to "Think before they look." Security is ensured by hashing credentials using BCrypt and validating API routes with Spring Security. The integration of PostgreSQL ensures that user progress, streaks, profiles, and histories are securely saved and can be searched or filtered on-demand.
+        </p>
+
+
+        <!-- ==================== CHAPTER 3 ==================== -->
+        <h1>CHAPTER 3<br>SYSTEM ANALYSIS</h1>
+        
+        <h2>3.1 FEASIBILITY STUDY</h2>
+        <p>
+            Before undertaking the implementation, a three-way feasibility analysis was conducted to ensure project viability:
+        </p>
+        <p>
+            <strong>1. Technical Feasibility:</strong> The technology stack (React, Java 17, Spring Boot, Spring Security, JPA, PostgreSQL) represents mature, widely supported environments. Integration with the OpenAI API is achieved using standard HTTP client calls (RestTemplate) and Jackson JSON deserializers. Developing the frontend using Vite guarantees fast builds and hot module replacement. Therefore, the project is technically feasible.
+        </p>
+        <p>
+            <strong>2. Economic Feasibility:</strong> The development environment uses open-source software, including PostgreSQL database server, Node.js, and Java OpenJDK. The only operational cost involves the OpenAI completions API billing. Since the platform utilizes the cost-efficient `gpt-4o-mini` model, API costs per query are fractions of a cent, making the platform highly cost-effective and economically viable.
+        </p>
+        <p>
+            <strong>3. Operational Feasibility:</strong> The system is designed to run in standard modern web browsers. The minimal dark-themed interface mimics tools that computer science students already use daily. The application requires zero installation on the user's local machine, ensuring high user adoption and simple operational deployment.
+        </p>
+
+        <h2>3.2 SOFTWARE REQUIREMENTS SPECIFICATION (SRS)</h2>
+        <h3>3.2.1 Functional Requirements</h3>
+        <ol>
+            <li><strong>User Account Management:</strong> Users must be able to register accounts and log in securely. The system must issue a JWT token upon successful authentication.</li>
+            <li><strong>Interactive DSA Mentor:</strong> The chat interface must submit user queries to the backend and render responses in 8 distinct collapsible sections.</li>
+            <li><strong>Code Manipulation:</strong> The UI must render Java code syntax highlighting and provide copy-to-clipboard and source-code-download triggers.</li>
+            <li><strong>Conversation History:</strong> The application must fetch, search, pin, rename, and delete conversation history cards using RESTful endpoints.</li>
+            <li><strong>Performance Dashboard:</strong> The user profile must track active streaks, milestone badges, difficulty distribution, and GitHub-style activity charts.</li>
+        </ol>
+
+        <h3>3.2.2 Non-Functional Requirements</h3>
+        <ul>
+            <li><strong>Security:</strong> All passwords must be hashed using BCrypt. Stateless APIs must require a valid `Authorization: Bearer <token>` header.</li>
+            <li><strong>Performance:</strong> The application must render local transitions instantly, and AI skeleton loaders must pulse during remote data fetches.</li>
+            <li><strong>Reliability:</strong> If the backend database or AI API is unreachable, the system must fail-safe to mock data options to preserve usability.</li>
+            <li><strong>Responsiveness:</strong> The visual layout must collapse to a single column format on mobile viewports.</li>
+        </ul>
+
+        <h2>3.3 UML DIAGRAMS</h2>
+        <h3>3.3.1 Use Case Diagram</h3>
+        <div class="diagram-box">
+                  ┌──────────────────────────────────────────────┐
+                  │              CodeMentor AI System            │
+                  │                                              │
+                  │   ┌────────────┐        ┌────────────────┐   │
+                  │   │ Register   │◄───────┤ AuthController │   │
+                  │   └────────────┘        └────────────────┘   │
+                  │          ▲                       ▲           │
+                  │          │                       │           │
+       ┌──────┐   │   ┌────────────┐        ┌────────────────┐   │
+       │ User ├───┼───┤ Submit Qn  ├───────┤ ChatController  │   │
+       └──────┘   │   └────────────┘        └────────────────┘   │
+                  │          │                       │           │
+                  │          ▼                       ▼           │
+                  │   ┌────────────┐        ┌────────────────┐   │
+                  │   │ Manage     ├───────┤HistoryController│   │
+                  │   │ History    │        └────────────────┘   │
+                  │   └────────────┘                             │
+                  └──────────────────────────────────────────────┘</div>
+
+        <h3>3.3.2 Entity-Relationship (ER) Diagram</h3>
+        <div class="diagram-box">
+  ┌──────────────┐             ┌──────────────────┐             ┌──────────────┐
+  │    USERS     │             │  CONVERSATIONS   │             │ USER_PROFILE │
+  ├──────────────┤             ├──────────────────┤             ├──────────────┤
+  │ PK id        │ 1         M │ PK id            │ 1         1 │ PK id        │
+  │    username  ├────────────►│    topic         ├────────────►│    streak    │
+  │    email     │             │    difficulty    │             │    xp        │
+  │    password  │             │    prompt_text   │             │    solved_cnt│
+  │    role      │             │    created_at    │             └──────────────┘
+  └──────────────┘             │    is_pinned     │
+                               │    message_count │
+                               └──────────────────┘</div>
+
+        <h3>3.3.3 Sequence Diagram</h3>
+        <div class="diagram-box">
+User          React App        SecurityFilter      ChatController      OpenAiService       PostgreSQL
+ │                │                  │                    │                  │                 │
+ ├─Submit Prompt─►│                  │                    │                  │                 │
+ │                ├─POST /api/chat──►│                    │                  │                 │
+ │                │ (Bearer Token)   ├────Validate JWT───►│                  │                 │
+ │                │                  │                    ├─Get AI Completion┤                 │
+ │                │                  │                    │                 ─┼─Request Prompt─►│
+ │                │                  │                    │                  │                 │
+ │                │                  │                    │                  │◄─Receive JSON───┤
+ │                │                  │                    ├─Save Convo Record─────────────────►│
+ │                │                  │                    │                  │                 │
+ │                │◄─200 OK JSON─────┼────────────────────┤                  │                 │
+ │◄─Render Steps──┤                  │                    │                  │                 │</div>
+
+
+        <!-- ==================== CHAPTER 4 ==================== -->
+        <h1>CHAPTER 4<br>SYSTEM SPECIFICATION</h1>
+        
+        <h2>4.1 HARDWARE REQUIREMENTS</h2>
+        <p>
+            The physical environment required to develop, compile, host, and access the CodeMentor AI system includes:
+        </p>
+        <ul>
+            <li><strong>Processor (CPU):</strong> Dual-Core Intel Core i5 or AMD Ryzen 5 processor operating at a minimum frequency of 2.4 GHz. A Quad-Core processor is recommended for running the React Vite server, PostgreSQL service, and Spring Boot application concurrently.</li>
+            <li><strong>System Memory (RAM):</strong> Minimum 8 GB DDR4 RAM. 16 GB is recommended to support IntelliJ IDEA/VS Code IDEs and local PostgreSQL database instances without system throttling.</li>
+            <li><strong>Storage Space:</strong> Solid State Drive (SSD) with at least 10 GB of free space for application source files, node modules dependencies, Maven repository caches, and local PostgreSQL database records.</li>
+            <li><strong>Internet Connection:</strong> Standard broadband connection to communicate with the remote OpenAI completions endpoint and pull package dependencies via Maven Central and npm.</li>
+        </ul>
+
+        <h2>4.2 SOFTWARE REQUIREMENTS</h2>
+        <p>
+            The operating environments, software runtimes, build utilities, and code compilers utilized to construct the system are detailed below:
+        </p>
+        <ul>
+            <li><strong>Operating System:</strong> Microsoft Windows 10/11 (64-bit), Linux (Ubuntu 20.04 LTS or higher), or macOS (Big Sur or higher).</li>
+            <li><strong>Java Development Kit (JDK):</strong> Oracle OpenJDK 17 or Java 21 runtime environments.</li>
+            <li><strong>Database Management System:</strong> PostgreSQL 15 or higher relational database server.</li>
+            <li><strong>NodeJS Runtime:</strong> Node.js version 18.x or 20.x LTS with NPM package manager for building the React application.</li>
+            <li><strong>Build Tooling:</strong> Apache Maven 3.8.x for Java backend dependency resolving and compilation.</li>
+            <li><strong>Integrated Development Environment (IDE):</strong> JetBrains IntelliJ IDEA (Community or Ultimate Edition) for Java development, and Microsoft Visual Studio Code for React/CSS styling.</li>
+            <li><strong>Web Browsers:</strong> Google Chrome, Mozilla Firefox, or Microsoft Edge.</li>
+        </ul>
+
+
+        <!-- ==================== CHAPTER 5 ==================== -->
+        <h1>CHAPTER 5<br>SYSTEM ENVIRONMENT</h1>
+        
+        <h2>5.1 JAVA & SPRING BOOT FRAMEWORK</h2>
+        <p>
+            Java is chosen as the core backend programming language due to its type safety, platform independence, robust memory management, and extensive enterprise framework support. Spring Boot is an extension of the Spring framework that eliminates boilerplate XML configurations, introducing starter dependencies and embedded runtime servers (such as Tomcat) to allow developers to build production-grade standalone applications instantly.
+        </p>
+        <p>
+            In CodeMentor AI, Spring Boot leverages **Spring Web MVC** to handle RESTful endpoint routing, mapping incoming HTTP POST requests containing prompts to Java DTO beans using the Jackson serialization library. It also coordinates dependency injection, binding service singletons such as `OpenAiService` to REST controllers like `ChatController` and `HistoryController` dynamically.
+        </p>
+
+        <h2>5.2 POSTGRESQL & HIBERNATE ORM</h2>
+        <p>
+            PostgreSQL is a powerful, open-source object-relational database system that supports advanced SQL querying, relational integrity, and high transactional safety. Hibernate is an Object-Relational Mapping (ORM) framework that acts as a bridge between the object-oriented Java classes and the relational PostgreSQL tables.
+        </p>
+        <p>
+            In this project, Hibernate automatically handles table creations and schema updates from entity class annotations (e.g., `@Entity`, `@Table`, `@Id`). **Spring Data JPA** simplifies repository implementation by automatically generating SQL queries from method declarations (e.g., `findByIsPinnedTrueOrderByCreatedAtDesc()`), reducing the developer's need to write complex SQL statements.
+        </p>
+
+        <h2>5.3 REACT.JS & VITE BUILD ENVIRONMENT</h2>
+        <p>
+            React.js is a component-based JavaScript library developed by Meta for building interactive user interfaces. It uses a Virtual DOM to compute UI diffs and re-render components efficiently when states change. 
+        </p>
+        <p>
+            In CodeMentor AI, React manages visual states like collapsible sections, active views, user input fields, and asynchronous loading states. **Vite** is used as the frontend build tool. Vite utilizes native ES modules (ESM) to serve source files during development, ensuring fast hot module replacement (HMR) and compiling highly optimized assets for production in seconds.
+        </p>
+
+
+        <!-- ==================== CHAPTER 6 ==================== -->
+        <h1>CHAPTER 6<br>IMPLEMENTATION</h1>
+        
+        <h2>6.1 AUTHENTICATION & SECURITY MODULE (JWT)</h2>
+        <p>
+            Securing access to the AI services is handled by a stateless JWT token verification workflow. When a user submits registration details, they are validated, and the password is encrypted using a cryptographic BCrypt hashing algorithm before insertion into PostgreSQL. Upon login, the user's credentials are authenticated by the `AuthenticationManager`. On success, the server builds a compact JSON Web Token signed with a HS256 key:
+        </p>
+        <pre>
+// JwtUtils snippet for JWT signing
+public String generateJwtToken(Authentication authentication) {
+    UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+    return Jwts.builder()
+            .subject(userPrincipal.getUsername())
+            .issuedAt(new Date())
+            .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+            .signWith(key())
+            .compact();
+}</pre>
+        <p>
+            For subsequent requests to `/api/chat` or `/api/history`, the `JwtAuthenticationFilter` intercepts the request, parses the header (`Authorization: Bearer <token>`), checks the signature, and sets the authenticated principal inside Spring Security's context.
+        </p>
+
+        <h2>6.2 8-STEP INTERACTIVE CHAT MODULE</h2>
+        <p>
+            The chat system connects user queries to the OpenAI endpoint. To enforce a consistent, structured output format suitable for student learning, the system prompts the AI to respond in a strict JSON structure matching the DTO `ChatResponse.java`.
+        </p>
+        <pre>
+// Java DTO mapping the 8-Stage response structure
+@Data
+public class ChatResponse {
+    private String topic;
+    private String difficulty;
+    private String step1ProblemUnderstanding;
+    private String step2BruteForceConcept;
+    private String step3ThinkBeforeOptimize;
+    private String step4Hint;
+    private String step5OptimalJavaCode;
+    private String step6DebuggingChallenge;
+    private List&lt;InterviewQuestion&gt; step7InterviewQuestions;
+    private String step8LearningSummary;
+}</pre>
+        <p>
+            The prompt commands the model to return JSON structure conforming to the above fields. The React frontend reads this payload and populates distinct interactive CSS panels. If the backend is offline, the React application falls back to showing local mock cards so the user experience is not disrupted.
+        </p>
+
+        <h2>6.3 CONVERSATION ARCHIVE & HISTORY MODULE</h2>
+        <p>
+            The conversation history module permits CRUD actions. In the database, the `conversations` table stores the topic, difficulty, prompt text, pin status, and creation timestamp. The frontend `HistoryPage.jsx` fetches data using:
+        </p>
+        <pre>
+// React Fetching inside HistoryPage
+const fetchHistory = async () => {
+  try {
+    const res = await fetch('http://localhost:8080/api/history');
+    if (res.ok) {
+      const data = await res.json();
+      setConversations(data.map(c => ({
+        id: c.id,
+        title: c.topic,
+        pinned: c.pinned || c.isPinned,
+        date: new Date(c.createdAt),
+        difficulty: c.difficulty
+      })));
+    }
+  } catch (err) {
+    console.error("Fetch failed", err);
+  }
+};</pre>
+        <p>
+            Using PATCH methods, users can toggle the `isPinned` state and edit the `topic` name. DELETE queries permit purging old conversations.
+        </p>
+
+        <h2>6.4 PERFORMANCE & PROFILE MODULE</h2>
+        <p>
+            To Gamify the learning experience, user metrics are aggregated and rendered in a profile dashboard. The `ProfilePage.jsx` component renders:
+        </p>
+        <ul>
+            <li><strong>Streak Flame Container:</strong> An active count of consecutive practice days with dynamic CSS animations.</li>
+            <li><strong>Badges Row:</strong> Earned achievements like "Linked List Master" or "Stack Solver."</li>
+            <li><strong>GitHub Activity Grid:</strong> A grid showing user practice frequency over the past months, using green color-scale blocks to represent intensity.</li>
+        </ul>
+
+        <h2>6.5 DATABASE SCHEMA DESIGN</h2>
+        <p>
+            The physical table structures generated in PostgreSQL are defined by the following SQL DDL schemas:
+        </p>
+        <pre>
+-- 1. Users Table
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) DEFAULT 'ROLE_USER'
+);
+
+-- 2. Conversations Table
+CREATE TABLE conversations (
+    id BIGSERIAL PRIMARY KEY,
+    topic VARCHAR(100) NOT NULL,
+    difficulty VARCHAR(20),
+    prompt_text VARCHAR(2000),
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    is_pinned BOOLEAN DEFAULT FALSE,
+    message_count INTEGER DEFAULT 1
+);</pre>
+
+
+        <!-- ==================== CHAPTER 7 ==================== -->
+        <h1>CHAPTER 7<br>TESTING</h1>
+        
+        <h2>7.1 TESTING METHODOLOGIES APPLIED</h2>
+        <p>
+            To verify the reliability, security, and accuracy of the CodeMentor AI system, multiple testing methodologies were systematically applied:
+        </p>
+        <p>
+            <strong>1. Unit Testing:</strong> Individual backend components were verified using JUnit 5 and Mockito. In particular, `OpenAiService` was tested by mocking the RestTemplate bean to return mock JSON payloads, ensuring that JSON parsing and error handling operate correctly under bad gateway responses.
+        </p>
+        <p>
+            <strong>2. Integration Testing:</strong> REST endpoints like `/api/history` and `/api/auth/login` were tested end-to-end. We verified that creating a conversation successfully commits a record in PostgreSQL, and registering a duplicate user returns a 400 Bad Request error.
+        </p>
+        <p>
+            <strong>3. Security Testing:</strong> Tested API routes to confirm that accessing `/api/chat` without a valid Bearer token in the request header returns a 403 Forbidden error. Verified that password fields stored in database tables are fully encrypted and unreadable.
+        </p>
+
+        <h2>7.2 TEST CASES TABLE</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>TC ID</th>
+                    <th>Module</th>
+                    <th>Input Test Scenario</th>
+                    <th>Expected Output</th>
+                    <th>Actual Result</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>TC-01</td>
+                    <td>Auth</td>
+                    <td>Register user with unique credentials.</td>
+                    <td>HTTP 200: "User registered successfully!"</td>
+                    <td>User saved; returned 200.</td>
+                    <td>PASS</td>
+                </tr>
+                <tr>
+                    <td>TC-02</td>
+                    <td>Auth</td>
+                    <td>Register user with an existing email.</td>
+                    <td>HTTP 400: "Error: Email is already in use!"</td>
+                    <td>Returned 400 Bad Request.</td>
+                    <td>PASS</td>
+                </tr>
+                <tr>
+                    <td>TC-03</td>
+                    <td>Security</td>
+                    <td>Access `/api/history` without JWT token.</td>
+                    <td>HTTP 403 Forbidden.</td>
+                    <td>Blocked; returned 403.</td>
+                    <td>PASS</td>
+                </tr>
+                <tr>
+                    <td>TC-04</td>
+                    <td>Chat</td>
+                    <td>Submit empty string prompt.</td>
+                    <td>HTTP 400 Bad Request.</td>
+                    <td>Returned 400.</td>
+                    <td>PASS</td>
+                </tr>
+                <tr>
+                    <td>TC-05</td>
+                    <td>Chat</td>
+                    <td>Submit "Two Sum in Java" prompt.</td>
+                    <td>HTTP 200 with 8-Stage JSON response.</td>
+                    <td>Parsed successfully; returned 200.</td>
+                    <td>PASS</td>
+                </tr>
+                <tr>
+                    <td>TC-06</td>
+                    <td>History</td>
+                    <td>PATCH `/api/history/{id}/pin`.</td>
+                    <td>HTTP 200 with updated pin status.</td>
+                    <td>Pin toggled; returned 200.</td>
+                    <td>PASS</td>
+                </tr>
+                <tr>
+                    <td>TC-07</td>
+                    <td>History</td>
+                    <td>DELETE `/api/history/{id}`.</td>
+                    <td>HTTP 204 No Content.</td>
+                    <td>Row deleted; returned 204.</td>
+                    <td>PASS</td>
+                </tr>
+                <tr>
+                    <td>TC-08</td>
+                    <td>History</td>
+                    <td>Search history by "BST" keyword.</td>
+                    <td>HTTP 200 with filtered list.</td>
+                    <td>Filtered items; returned 200.</td>
+                    <td>PASS</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <!-- ==================== CHAPTER 8 ==================== -->
+        <h1>CHAPTER 8<br>CONCLUSION</h1>
+        
+        <h2>8.1 PROJECT SUMMARY</h2>
+        <p>
+            During the summer internship period, the **CodeMentor AI** application was successfully designed, developed, tested, and pushed to GitHub. The project highlights the integration of modern frontend libraries with secure backend Java architectures. By leveraging React's virtual DOM rendering and Spring Boot's lightweight REST controller routing, we created a seamless coding assistant. 
+        </p>
+        <p>
+            The incorporation of Spring Security and JWT ensures data protection, while the PostgreSQL database persisted conversation logs and user stats efficiently. The 8-stage interactive chat structure provides structured guidance to computer science students preparing for technical DSA interviews, bridging the gap between dry academic tutorials and real-world interviews.
+        </p>
+
+        <h2>8.2 FUTURE SCOPE & ENHANCEMENTS</h2>
+        <p>
+            While the current version of CodeMentor AI is fully functional, several enhancements can be integrated in future phases:
+        </p>
+        <ul>
+            <li><strong>Embedded Compiler sandbox:</strong> Adding a safe, containerized execution runtime (using WebAssembly or isolated Docker sandboxes) to allow students to run and test their Java code directly inside the chat UI.</li>
+            <li><strong>Voice-Guided Mock Interviews:</strong> Integrating speech-to-text and text-to-speech APIs to simulate a verbal technical interview.</li>
+            <li><strong>Resume Parser integration:</strong> Allowing candidates to upload their PDF profiles to get tailored mock coding questions based on their resume skills.</li>
+        </ul>
+
+
+        <!-- ==================== CHAPTER 9 ==================== -->
+        <h1>CHAPTER 9<br>SCREENSHOTS & CERTIFICATE</h1>
+        
+        <h2>9.1 INTERFACE WALKTHROUGH & SCREENSHOT DESCRIPTION</h2>
+        <p>
+            This chapter outlines the key interfaces developed for the CodeMentor AI system. Users can navigate through these screens dynamically:
+        </p>
+        <p class="no-indent">
+            <strong>1. Landing Dashboard:</strong><br>
+            A clean, dark interface containing suggested prompt cards (e.g., "Linked List Cycle," "Graph Traversals"). The center panel has an auto-resizing text prompt box with attachment buttons.
+        </p>
+        <p class="no-indent">
+            <strong>2. Asynchronous Learning Console (ChatArea):</strong><br>
+            Displays user messages and AI cards. During processing, a pulsing loader block is shown. Once ready, the 8 steps are displayed in collapsible accordion panels. Java code blocks include copy and source-code download options.
+        </p>
+        <p class="no-indent">
+            <strong>3. History Archive Manager:</strong><br>
+            Contains search fields, filter category chips (All, Today, Pinned), and conversation cards. Users can pin, rename, or delete records.
+        </p>
+        <p class="no-indent">
+            <strong>4. User Profile Page:</strong><br>
+            Features streaks, unlocked milestone badges, and a GitHub-style practice grid representing activity history.
+        </p>
+
+        <h2 style="margin-top: 50px;">9.2 INTERNSHIP COMPLETION CERTIFICATE PLACEHOLDER</h2>
+        <div style="border: 4px double #000; padding: 30px; text-align: center; margin-top: 20px; box-sizing: border-box;">
+            <div style="font-size: 18pt; font-weight: bold; margin-bottom: 10px;">CERTIFICATE OF COMPLETION</div>
+            <div style="font-size: 12pt; font-style: italic; margin-bottom: 20px;">This certificate is proudly presented to</div>
+            <div style="font-size: 16pt; font-weight: bold; text-decoration: underline; margin-bottom: 20px;">STUDENT NAME</div>
+            <div style="font-size: 12pt; line-height: 1.6; margin-bottom: 30px;">
+                for successfully completing a summer internship project on <strong>"CodeMentor AI Development"</strong><br>
+                from June 2026 to July 2026. During this tenure, the candidate demonstrated excellence in<br>
+                <strong>Java, Spring Boot, Spring Security, React.js, and PostgreSQL</strong> database management.
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 45px; padding: 0 30px;">
+                <div>
+                    <div style="border-top: 1px solid #000; width: 150px; margin-bottom: 5px;"></div>
+                    <div style="font-size: 10pt; font-weight: bold;">PROJECT GUIDE</div>
+                </div>
+                <div>
+                    <div style="border-top: 1px solid #000; width: 150px; margin-bottom: 5px;"></div>
+                    <div style="font-size: 10pt; font-weight: bold;">EXTERNAL EXAMINER</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Page numbers printed at bottom center -->
+    <div class="page-footer no-print">
+        CodeMentor AI - Summer Internship Report
+    </div>
+
+</body>
+</html>
