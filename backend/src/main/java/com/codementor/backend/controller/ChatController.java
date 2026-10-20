@@ -32,7 +32,11 @@ public class ChatController {
     @PostMapping
     public ResponseEntity<ChatResponse> getChatResponse(@Valid @RequestBody ChatRequest request) {
         String prompt = request.getPrompt().trim();
-        ChatResponse response = openAiService.getCodeMentorResponse(prompt);
+        ChatResponse response = openAiService.getCodeMentorResponse(
+                prompt,
+                request.getApiKey(),
+                request.getModel()
+        );
 
         // Persist the conversation to H2 for history tracking
         Conversation conversation = Conversation.builder()

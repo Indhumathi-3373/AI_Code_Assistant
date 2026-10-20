@@ -40,7 +40,11 @@ const NAV_ITEMS = [
 ];
 
 // AI model options
-const AI_MODELS = ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'];
+const AI_MODELS = [
+  { value: 'gpt-4o-mini', label: 'gpt-4o-mini (Default - Fast & Recommended)' },
+  { value: 'gpt-4o', label: 'gpt-4o (High Intelligence)' },
+  { value: 'gpt-3.5-turbo', label: 'gpt-3.5-turbo (Legacy)' },
+];
 
 // ------------------------------------------------------------------
 // Sub-component: Toggle switch
@@ -176,18 +180,7 @@ function AppearanceSection({ settings, onUpdate }) {
 // ------------------------------------------------------------------
 // Section: AI Model
 // ------------------------------------------------------------------
-function AIModelSection({ settings, onUpdate }) {
-  // Visibility of the API key
-  const [showKey, setShowKey] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [saved, setSaved] = useState(false);
-
-  function handleSaveKey() {
-    // In a real app you'd securely store this key
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  }
-
+function AIModelSection({ settings, onUpdate, onAiConnectionChange }) {
   return (
     <div className="settings-section">
       <h3 className="settings-section__title">AI Model</h3>
@@ -195,15 +188,19 @@ function AIModelSection({ settings, onUpdate }) {
       {/* Model selector */}
       <SettingRow
         label="Model"
-        description="Select the OpenAI model to power responses."
+        description="Select the AI model to power CodeMentor responses."
       >
         <select
           className="settings-select"
           value={settings.model}
-          onChange={(e) => onUpdate('model', e.target.value)}
+          onChange={(e) => {
+            const nextModel = e.target.value;
+            onUpdate('model', nextModel);
+            onAiConnectionChange((prev) => ({ ...prev, model: nextModel }));
+          }}
         >
           {AI_MODELS.map((m) => (
-            <option key={m} value={m}>{m}</option>
+            <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>
       </SettingRow>
@@ -230,37 +227,17 @@ function AIModelSection({ settings, onUpdate }) {
         </div>
       </div>
 
-      {/* API key input */}
+      {/* Secure Backend Configuration Notice */}
       <div className="settings-apikey-block">
         <p className="settings-apikey-note">
-          🔑 Enter your <strong>OpenAI API key</strong> below. It is stored locally
-          and never sent to any third-party server.
+          🔒 <strong>Secure Server-Side Credentials</strong>: API keys are securely managed
+          by the backend environment (via <code>OPENAI_API_KEY</code> in <code>backend/.env</code> or system environment variables)
+          and are never exposed to browser bundles or client network requests.
         </p>
-        <div className="settings-apikey-row">
-          <div className="settings-apikey-input-wrap">
-            <input
-              type={showKey ? 'text' : 'password'}
-              className="settings-apikey-input"
-              placeholder="sk-••••••••••••••••••••"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-            />
-            <button
-              className="settings-apikey-eye"
-              onClick={() => setShowKey((v) => !v)}
-              title={showKey ? 'Hide key' : 'Show key'}
-            >
-              {showKey ? <FiEyeOff /> : <FiEye />}
-            </button>
-          </div>
-          <button
-            className={`settings-apikey-save ${saved ? 'saved' : ''}`}
-            onClick={handleSaveKey}
-          >
-            <FiSave />
-            {saved ? 'Saved!' : 'Save'}
-          </button>
-        </div>
+        <p style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          If you encounter an <em>OpenAI quota/spend limit</em> error (HTTP 502), ensure your OpenAI account
+          has positive prepaid credits at <a href="https://platform.openai.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>platform.openai.com/billing</a> and update your key in <code>backend/.env</code>.
+        </p>
       </div>
     </div>
   );
@@ -358,7 +335,7 @@ function AboutSection() {
 // ------------------------------------------------------------------
 // Main Component: SettingsModal
 // ------------------------------------------------------------------
-export default function SettingsModal({ isOpen, onClose }) {
+export default function SettingsModal({ isOpen, onClose, selectedModel = 'gpt-4o-mini', onModelChange = () => {} }) {
   // Active sidebar section
   const [activeSection, setActiveSection] = useState('general');
 
@@ -369,9 +346,15 @@ export default function SettingsModal({ isOpen, onClose }) {
     theme: 'Dark',          // Dark is default/active
     fontSize: 'Medium',
     compactMode: false,
-    model: 'gpt-4o-mini',
+    model: selectedModel,
     temperature: 0.7,
   });
+
+  useEffect(() => {
+    if (selectedModel) {
+      setSettings((prev) => ({ ...prev, model: selectedModel }));
+    }
+  }, [selectedModel]);
 
   /** Generic updater for any setting key */
   function updateSetting(key, value) {
@@ -397,7 +380,10 @@ export default function SettingsModal({ isOpen, onClose }) {
     switch (activeSection) {
       case 'general':    return <GeneralSection settings={settings} onUpdate={updateSetting} />;
       case 'appearance': return <AppearanceSection settings={settings} onUpdate={updateSetting} />;
-      case 'ai':         return <AIModelSection settings={settings} onUpdate={updateSetting} />;
+      case 'ai':         return <AIModelSection settings={settings} onUpdate={updateSetting} onAiConnectionChange={(fnOrObj) => {
+        const next = typeof fnOrObj === 'function' ? fnOrObj(settings).model : fnOrObj?.model;
+        if (next) onModelChange(next);
+      }} />;
       case 'shortcuts':  return <ShortcutsSection />;
       case 'about':      return <AboutSection />;
       default:           return null;

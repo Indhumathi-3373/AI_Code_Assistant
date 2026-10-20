@@ -23,6 +23,7 @@ function App() {
 
   // Track if SettingsModal is open
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
 
   // Active chat session ID. Null represents starting screen (LandingScreen)
   const [activeChatId, setActiveChatId] = useState(null);
@@ -97,7 +98,12 @@ function App() {
         ) : !activeChatId ? (
           <LandingScreen onSubmitPrompt={handleSubmitPrompt} />
         ) : (
-          <ChatArea initialPrompt={currentPrompt} onBackToLanding={handleNewChat} />
+          <ChatArea
+            initialPrompt={currentPrompt}
+            onBackToLanding={handleNewChat}
+            selectedModel={selectedModel}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+          />
         )}
       </main>
 
@@ -110,6 +116,8 @@ function App() {
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
       />
     </div>
   );

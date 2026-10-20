@@ -1,5 +1,6 @@
 package com.codementor.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.List;
 public class ChatResponse {
     private String topic;
     private String difficulty;
+    @JsonProperty("isDebug")
     private boolean isDebug;
     private Step1 step1;
     private Step2 step2;

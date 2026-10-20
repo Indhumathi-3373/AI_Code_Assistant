@@ -972,3 +972,141 @@
   40% { transform: scale(1); }
 }
 
+/* ---------- Offline & Quota Notice Banner ---------- */
+.offline-notice-banner {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.offline-notice-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f59e0b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.offline-notice-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.offline-notice-title {
+  letter-spacing: -0.01em;
+}
+
+.offline-notice-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.offline-notice-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.offline-notice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fcd34d;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.offline-notice-btn:hover {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: rgba(245, 158, 11, 0.6);
+  transform: translateY(-1px);
+}
+
+/* ---------- API Error / Failure Card in Chat ---------- */
+.message-wrapper--error {
+  justify-content: flex-start;
+  margin-bottom: 24px;
+}
+
+.api-error-card {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  padding: 18px 22px;
+  max-width: 760px;
+  width: 100%;
+}
+
+.api-error-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ef4444;
+  margin-bottom: 8px;
+}
+
+.api-error-card__icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.api-error-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+  color: #f87171;
+}
+
+.api-error-card__message {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.api-error-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.api-error-card__retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.api-error-card__retry-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.api-error-card__hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
