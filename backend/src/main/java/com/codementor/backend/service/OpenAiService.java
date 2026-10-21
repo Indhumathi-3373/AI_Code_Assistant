@@ -162,17 +162,7 @@ public class OpenAiService {
                     if (message != null) {
                         Object content = message.get("content");
                         if (content instanceof String jsonString && !jsonString.isBlank()) {
-                            String cleaned = jsonString.trim();
-                            if (cleaned.startsWith("```json")) {
-                                cleaned = cleaned.substring(7);
-                            } else if (cleaned.startsWith("```")) {
-                                cleaned = cleaned.substring(3);
-                            }
-                            if (cleaned.endsWith("```")) {
-                                cleaned = cleaned.substring(0, cleaned.length() - 3);
-                            }
-                            cleaned = cleaned.trim();
-                            return objectMapper.readValue(cleaned, ChatResponse.class);
+                            return objectMapper.readValue(extractJsonObject(jsonString), ChatResponse.class);
                         }
                     }
                 }
@@ -189,6 +179,20 @@ public class OpenAiService {
         } catch (Exception exception) {
             throw new AiServiceException("The AI service returned an invalid response.", exception);
         }
+    }
+
+    /** Accepts a JSON object wrapped in a markdown fence or short provider preamble. */
+    private String extractJsonObject(String content) {
+        String cleaned = content.trim()
+                .replaceFirst("(?is)^```(?:json)?\\s*", "")
+                .replaceFirst("(?s)\\s*```$", "")
+                .trim();
+        int objectStart = cleaned.indexOf('{');
+        int objectEnd = cleaned.lastIndexOf('}');
+        if (objectStart >= 0 && objectEnd > objectStart) {
+            return cleaned.substring(objectStart, objectEnd + 1);
+        }
+        return cleaned;
     }
 
     private List<String> candidateModels(String requestedModel) {
