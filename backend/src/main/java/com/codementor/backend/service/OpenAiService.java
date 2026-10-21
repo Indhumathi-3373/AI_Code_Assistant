@@ -123,27 +123,18 @@ public class OpenAiService {
         int upstreamStatus = -1;
 
         // Detailed system instructions to force GPT output to conform to JSON schema
-        String systemPrompt = "You are CodeMentor AI, an expert computer science interview coach. " +
-                "You must analyze the user's coding query, Java code, or DSA question and respond strictly in JSON matching the requested structure.\n\n" +
-                "Case 1: Standard DSA / Java Learning Prompt\n" +
-                "If the user asks to explain an algorithm or solve a problem, respond with a JSON object containing:\n" +
-                "- 'topic': name of the topic.\n" +
-                "- 'difficulty': 'Easy', 'Medium', or 'Hard'.\n" +
-                "- 'isDebug': false.\n" +
-                "- 'step1': Problem Understanding (problem, input, output, constraints list).\n" +
-                "- 'step2': Brute Force Solution (idea, code, dryRun list, timeComplexity, spaceComplexity).\n" +
-                "- 'step3': Think Before Optimization (question, hint1, hint2, hint3).\n" +
-                "- 'step5': Optimized Solution (explanation, code, dryRun list, timeComplexity, spaceComplexity, betterWhy).\n" +
-                "- 'step7': Interview Mode Q&A (questions list where each item has 'q' question and 'a' answer).\n" +
-                "- 'step8': Learning Summary (difficulty, concepts list, mistakes as one string, techniques list, pattern).\n\n" +
-                "Case 2: Code Debugging Prompt\n" +
-                "If the user pastes buggy Java code, set 'isDebug': true, and return a JSON object containing:\n" +
-                "- 'topic': 'Debugging - [Topic Name]'.\n" +
-                "- 'difficulty': 'Easy', 'Medium', or 'Hard'.\n" +
-                "- 'isDebug': true.\n" +
-                "- 'step6': Debugging & Repairs (errors list where each error has 'type', 'problem', 'reason', and 'fix'; and 'correctedCode' representing the fully working repaired Java class).\n" +
-                "- 'step8': Learning Summary (difficulty, concepts list, mistakes, techniques list, pattern).\n\n" +
-                "DO NOT add any markdown formatting like ```json or trailing text outside of the JSON object. The response must be a single, valid JSON block.";
+        String systemPrompt = "You are CodeMentor AI, an expert computer science interview coach. Return exactly one JSON object, no markdown or text outside it. " +
+                "Use JSON strings for prose/code, arrays of strings for constraints, dryRun, concepts, and techniques, and arrays of objects for questions/errors. " +
+                "Always include nonblank topic and difficulty and boolean isDebug. Never omit a required property; if a section has no entries, return an empty array. " +
+                "For a standard learning answer set isDebug=false and include: " +
+                "step1 {problem:string,input:string,output:string,constraints:string[]}; " +
+                "step2 {idea:string,code:string,dryRun:string[],timeComplexity:string,spaceComplexity:string}; " +
+                "step3 {question:string,hint1:string,hint2:string,hint3:string}; " +
+                "step5 {explanation:string,code:string,dryRun:string[],timeComplexity:string,spaceComplexity:string,betterWhy:string}; " +
+                "step7 {questions:{q:string,a:string}[]}; " +
+                "step8 {difficulty:string,concepts:string[],mistakes:string,techniques:string[],pattern:string}. " +
+                "For a Java debugging answer set isDebug=true and include step6 {errors:{type:string,problem:string,reason:string,fix:string}[],correctedCode:string} and the same step8 shape. " +
+                "Do not include the standard-only steps in a debugging answer or step6 in a standard answer.";
 
         try {
             Map<String, Object> requestBody = new HashMap<>();
@@ -173,14 +164,27 @@ public class OpenAiService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(activeApiKey);
 
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-
-            ResponseEntity<String> response = restTemplate.postForEntity(endpoint, entity, String.class);
-            upstreamStatus = response.getStatusCode().value();
-            if (!response.getStatusCode().is2xxSuccessful() || !StringUtils.hasText(response.getBody())) {
-                throw invalidResponse("The AI provider returned an empty response.", provider, activeModel, response.getStatusCode().value(), null);
+            for (int attempt = 0; attempt < 2; attempt++) {
+                try {
+                    HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+                    ResponseEntity<String> response = restTemplate.postForEntity(endpoint, entity, String.class);
+                    upstreamStatus = response.getStatusCode().value();
+                    if (!response.getStatusCode().is2xxSuccessful() || !StringUtils.hasText(response.getBody())) {
+                        throw invalidResponse("The AI provider returned an empty response.", provider, activeModel, response.getStatusCode().value(), null);
+                    }
+                    return parseProviderResponse(response.getBody(), provider, activeModel, response.getStatusCode().value());
+                } catch (InvalidProviderResponseException exception) {
+                    if (attempt == 1 || !provider.equals("nvidia")) throw exception;
+                    logger.info("Retrying invalid AI response once with schema correction: provider={}, model={}, upstreamStatus={}", provider, activeModel, exception.getUpstreamStatus());
+                    messages.add(Map.of("role", "user", "content", correctionInstruction(exception.getMessage())));
+                } catch (JsonProcessingException exception) {
+                    if (attempt == 1 || !provider.equals("nvidia")) throw exception;
+                    logger.info("Retrying malformed AI JSON once with schema correction: provider={}, model={}, upstreamStatus={}, exceptionType={}",
+                            provider, activeModel, upstreamStatus, exception.getClass().getSimpleName());
+                    messages.add(Map.of("role", "user", "content", "Your previous response was not valid JSON. Return the complete response again as one valid JSON object following the exact required schema. Do not omit fields or add markdown."));
+                }
             }
-            return parseProviderResponse(response.getBody(), provider, activeModel, response.getStatusCode().value());
+            throw new IllegalStateException("Unreachable AI response retry state.");
         } catch (HttpStatusCodeException exception) {
             logger.warn("AI provider request failed: provider={}, model={}, status={}", provider, activeModel, exception.getStatusCode().value(), exception);
             throw toAiServiceException(exception);
@@ -199,7 +203,7 @@ public class OpenAiService {
             String location = exception.getLocation() == null
                     ? "unknown location"
                     : "line " + exception.getLocation().getLineNr() + ", column " + exception.getLocation().getColumnNr();
-            logger.error("AI response JSON parsing/mapping failed: provider={}, model={}, upstreamStatus={}, exceptionType={}, path={}, location={}",
+            logger.error("AI response JSON parsing/mapping failed: provider={}, model={}, upstreamStatus={}, category=malformed_json_or_mapping, exceptionType={}, path={}, location={}",
                     provider, activeModel, upstreamStatus, exception.getClass().getSimpleName(), path, location, exception);
             throw new AiServiceException("The AI provider returned invalid response data at " + path + ". See backend logs for details.",
                     exception, false, HttpStatus.BAD_GATEWAY, upstreamStatus < 0 ? null : upstreamStatus);
@@ -227,21 +231,115 @@ public class OpenAiService {
 
         JsonNode tutorJson = objectMapper.readTree(extractJsonObject(content.asText()));
         normalizeMistakesField(tutorJson);
-        ChatResponse chatResponse = objectMapper.treeToValue(tutorJson, ChatResponse.class);
-        boolean hasExpectedFlow = chatResponse.isDebug()
-                ? chatResponse.getStep6() != null && chatResponse.getStep8() != null
-                : chatResponse.getStep1() != null && chatResponse.getStep2() != null
-                        && chatResponse.getStep3() != null && chatResponse.getStep5() != null
-                        && chatResponse.getStep7() != null && chatResponse.getStep8() != null;
-        if (!StringUtils.hasText(chatResponse.getTopic()) || !hasExpectedFlow) {
-            throw invalidResponse("The AI provider response did not match the coding tutor format.", provider, activeModel, upstreamStatus, null);
+        List<String> invalidPaths = validateTutorResponse(tutorJson);
+        if (!invalidPaths.isEmpty()) {
+            String category = invalidPaths.stream().anyMatch(path -> path.startsWith("type:"))
+                    ? "invalid_field_type" : "missing_or_empty_required_field";
+            logger.warn("AI provider response validation failed: provider={}, model={}, upstreamStatus={}, category={}, fields={}",
+                    provider, activeModel, upstreamStatus, category, invalidPaths);
+            throw new InvalidProviderResponseException("The AI provider response did not match the coding tutor format (" + category + ": " + String.join(", ", invalidPaths) + ").",
+                    upstreamStatus);
         }
-        return chatResponse;
+        return objectMapper.treeToValue(tutorJson, ChatResponse.class);
+    }
+
+    private List<String> validateTutorResponse(JsonNode root) {
+        List<String> invalid = new ArrayList<>();
+        requireText(root, "topic", invalid);
+        requireText(root, "difficulty", invalid);
+        if (!root.path("isDebug").isBoolean()) invalid.add("type:$.isDebug (boolean)");
+        boolean debug = root.path("isDebug").asBoolean(false);
+        if (debug) {
+            requireObject(root, "step6", invalid);
+            requireObject(root, "step8", invalid);
+            requireArray(root.path("step6"), "errors", "$.step6", invalid);
+            requireText(root.path("step6"), "correctedCode", "$.step6", invalid);
+            JsonNode errors = root.path("step6").path("errors");
+            if (errors.isArray()) for (int i = 0; i < errors.size(); i++) {
+                String parent = "$.step6.errors[" + i + "]";
+                for (String field : List.of("type", "problem", "reason", "fix")) requireText(errors.get(i), field, parent, invalid);
+            }
+            validateStep8(root.path("step8"), invalid);
+        } else {
+            requireObject(root, "step1", invalid);
+            requireObject(root, "step2", invalid);
+            requireObject(root, "step3", invalid);
+            requireObject(root, "step5", invalid);
+            requireObject(root, "step7", invalid);
+            requireObject(root, "step8", invalid);
+            JsonNode s1 = root.path("step1");
+            for (String field : List.of("problem", "input", "output")) requireText(s1, field, "$.step1", invalid);
+            requireArray(s1, "constraints", "$.step1", invalid);
+            JsonNode s2 = root.path("step2");
+            for (String field : List.of("idea", "code", "timeComplexity", "spaceComplexity")) requireText(s2, field, "$.step2", invalid);
+            requireArray(s2, "dryRun", "$.step2", invalid);
+            JsonNode s3 = root.path("step3");
+            for (String field : List.of("question", "hint1", "hint2", "hint3")) requireText(s3, field, "$.step3", invalid);
+            JsonNode s5 = root.path("step5");
+            for (String field : List.of("explanation", "code", "timeComplexity", "spaceComplexity", "betterWhy")) requireText(s5, field, "$.step5", invalid);
+            requireArray(s5, "dryRun", "$.step5", invalid);
+            requireArray(root.path("step7"), "questions", "$.step7", invalid);
+            JsonNode questions = root.path("step7").path("questions");
+            if (questions.isArray()) for (int i = 0; i < questions.size(); i++) {
+                requireText(questions.get(i), "q", "$.step7.questions[" + i + "]", invalid);
+                requireText(questions.get(i), "a", "$.step7.questions[" + i + "]", invalid);
+            }
+            validateStep8(root.path("step8"), invalid);
+        }
+        return invalid;
+    }
+
+    private void validateStep8(JsonNode step8, List<String> invalid) {
+        requireText(step8, "difficulty", "$.step8", invalid);
+        requireText(step8, "mistakes", "$.step8", invalid);
+        requireText(step8, "pattern", "$.step8", invalid);
+        requireArray(step8, "concepts", "$.step8", invalid);
+        requireArray(step8, "techniques", "$.step8", invalid);
+    }
+
+    private void requireObject(JsonNode root, String field, List<String> invalid) {
+        if (!root.path(field).isObject()) invalid.add("missing_or_invalid:$." + field + " (object)");
+    }
+
+    private void requireText(JsonNode node, String field, List<String> invalid) {
+        requireText(node, field, "$", invalid);
+    }
+
+    private void requireText(JsonNode node, String field, String parent, List<String> invalid) {
+        JsonNode value = node.path(field);
+        if (!value.isTextual()) invalid.add("type:" + parent + "." + field + " (string)");
+        else if (!StringUtils.hasText(value.asText())) invalid.add("missing_or_empty:" + parent + "." + field);
+    }
+
+    private void requireArray(JsonNode node, String field, String parent, List<String> invalid) {
+        JsonNode value = node.path(field);
+        if (!value.isArray()) invalid.add("type:" + parent + "." + field + " (array)");
+        else for (int i = 0; i < value.size(); i++) {
+            if (field.equals("questions") || field.equals("errors")) {
+                if (!value.get(i).isObject()) invalid.add("type:" + parent + "." + field + "[" + i + "] (object)");
+            } else if (!value.get(i).isTextual()) invalid.add("type:" + parent + "." + field + "[" + i + "] (string)");
+        }
+    }
+
+    private static class InvalidProviderResponseException extends AiServiceException {
+        InvalidProviderResponseException(String message, int upstreamStatus) {
+            super(message, null, false, HttpStatus.BAD_GATEWAY, upstreamStatus);
+        }
+        InvalidProviderResponseException(String message, int upstreamStatus, Throwable cause) {
+            super(message, cause, false, HttpStatus.BAD_GATEWAY, upstreamStatus);
+        }
     }
 
     private AiServiceException invalidResponse(String message, String provider, String activeModel, int upstreamStatus, Throwable cause) {
         logger.warn("Invalid AI provider response: provider={}, model={}, upstreamStatus={}, detail={}", provider, activeModel, upstreamStatus, message);
-        return new AiServiceException(message, cause, false, HttpStatus.BAD_GATEWAY, upstreamStatus);
+        return new InvalidProviderResponseException(message, upstreamStatus, cause);
+    }
+
+    private String correctionInstruction(String validationDetails) {
+        // Contains generated schema paths/categories only, never the user's prompt.
+        return "Your previous JSON response failed schema validation: " + validationDetails +
+                " Return the complete corrected answer as one JSON object matching the required standard or debugging schema. " +
+                "Do not omit required properties, change field types, use markdown, or add text outside the JSON.";
     }
 
     private void normalizeMistakesField(JsonNode tutorJson) {

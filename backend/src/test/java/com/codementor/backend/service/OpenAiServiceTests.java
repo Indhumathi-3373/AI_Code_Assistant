@@ -28,7 +28,16 @@ class OpenAiServiceTests {
 
     private static final String OPENAI_URL = "https://api.openai.test/v1/chat/completions";
     private static final String NVIDIA_URL = "https://nvidia.test/v1/chat/completions";
-    private static final String VALID_CONTENT = "{\"topic\":\"Two Sum\",\"difficulty\":\"Easy\",\"isDebug\":false,\"step1\":{},\"step2\":{},\"step3\":{},\"step5\":{},\"step7\":{},\"step8\":{}}";
+    private static final String VALID_CONTENT = "{\"topic\":\"Two Sum\",\"difficulty\":\"Easy\",\"isDebug\":false," +
+            "\"step1\":{\"problem\":\"Find pair\",\"input\":\"[2,7], 9\",\"output\":\"[0,1]\",\"constraints\":[\"One solution\"]}," +
+            "\"step2\":{\"idea\":\"Try every pair\",\"code\":\"class Solution {}\",\"dryRun\":[\"Check 2+7\"],\"timeComplexity\":\"O(n^2)\",\"spaceComplexity\":\"O(1)\"}," +
+            "\"step3\":{\"question\":\"Can we avoid repeated scans?\",\"hint1\":\"Store seen values\",\"hint2\":\"Use a map\",\"hint3\":\"Look up the complement\"}," +
+            "\"step5\":{\"explanation\":\"Use a hash map\",\"code\":\"class Solution {}\",\"dryRun\":[\"Find complement 7\"],\"timeComplexity\":\"O(n)\",\"spaceComplexity\":\"O(n)\",\"betterWhy\":\"One pass\"}," +
+            "\"step7\":{\"questions\":[{\"q\":\"Why a map?\",\"a\":\"It stores indices.\"}]}," +
+            "\"step8\":{\"difficulty\":\"Easy\",\"concepts\":[\"Hashing\"],\"mistakes\":\"Check indices\",\"techniques\":[\"Complement lookup\"],\"pattern\":\"Hash map\"}}";
+    private static final String NVIDIA_DEBUG_CONTENT = "{\"topic\":\"Debugging - Array Bounds\",\"difficulty\":\"Easy\",\"isDebug\":true," +
+            "\"step6\":{\"errors\":[{\"type\":\"Boundary\",\"problem\":\"Loop exceeds array\",\"reason\":\"Index equals length\",\"fix\":\"Use < length\"}],\"correctedCode\":\"class Solution {}\"}," +
+            "\"step8\":{\"difficulty\":\"Easy\",\"concepts\":[\"Bounds\"],\"mistakes\":\"Used <=\",\"techniques\":[\"Check limits\"],\"pattern\":\"Boundary check\"}}";
 
     private RestTemplate restTemplate;
     private MockRestServiceServer server;
@@ -77,6 +86,56 @@ class OpenAiServiceTests {
     }
 
     @Test
+    void parsesRepresentativeNvidiaDebuggingResponse() throws Exception {
+        server.expect(requestTo(NVIDIA_URL))
+                .andRespond(withSuccess(upstreamResponse(NVIDIA_DEBUG_CONTENT), MediaType.APPLICATION_JSON));
+
+        var result = service.getCodeMentorResponse("Fix this Java bug", "nv-test-key", "openai/gpt-oss-20b", "nvidia");
+
+        assertTrue(result.isDebug());
+        assertEquals("Boundary", result.getStep6().getErrors().get(0).getType());
+        server.verify();
+    }
+
+    @Test
+    void reportsMissingNvidiaRequiredFields() throws Exception {
+        String content = VALID_CONTENT.replace("\"step5\":{", "\"step5\":{").replace("\"step7\":{\"questions\":[{\"q\":\"Why a map?\",\"a\":\"It stores indices.\"}]},", "");
+        server.expect(requestTo(NVIDIA_URL)).andRespond(withSuccess(upstreamResponse(content), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(NVIDIA_URL)).andRespond(withSuccess(upstreamResponse(content), MediaType.APPLICATION_JSON));
+        AiServiceException error = assertThrows(AiServiceException.class,
+                () -> service.getCodeMentorResponse("Prompt", "key", "openai/gpt-oss-20b", "nvidia"));
+        assertTrue(error.getMessage().contains("$.step7"));
+        assertEquals(200, error.getUpstreamStatus());
+        server.verify();
+    }
+
+    @Test
+    void reportsNvidiaWrongNestedFieldTypes() throws Exception {
+        String content = VALID_CONTENT.replace("\"constraints\":[\"One solution\"]", "\"constraints\":{\"min\":1}");
+        server.expect(requestTo(NVIDIA_URL)).andRespond(withSuccess(upstreamResponse(content), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(NVIDIA_URL)).andRespond(withSuccess(upstreamResponse(content), MediaType.APPLICATION_JSON));
+        AiServiceException error = assertThrows(AiServiceException.class,
+                () -> service.getCodeMentorResponse("Prompt", "key", "openai/gpt-oss-20b", "nvidia"));
+        assertTrue(error.getMessage().contains("$.step1.constraints"));
+        server.verify();
+    }
+
+    @Test
+    void reportsMalformedNvidiaJsonAndEmptyContent() throws Exception {
+        server.expect(requestTo(NVIDIA_URL)).andRespond(withSuccess(upstreamResponse("{bad json"), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(NVIDIA_URL)).andRespond(withSuccess(upstreamResponse("{bad json"), MediaType.APPLICATION_JSON));
+        assertThrows(AiServiceException.class,
+                () -> service.getCodeMentorResponse("Prompt", "key", "openai/gpt-oss-20b", "nvidia"));
+        server.reset();
+        server.expect(requestTo(NVIDIA_URL)).andRespond(withSuccess(upstreamResponse(" "), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(NVIDIA_URL)).andRespond(withSuccess(upstreamResponse(" "), MediaType.APPLICATION_JSON));
+        AiServiceException error = assertThrows(AiServiceException.class,
+                () -> service.getCodeMentorResponse("Prompt", "key", "openai/gpt-oss-20b", "nvidia"));
+        assertTrue(error.getMessage().contains("empty or non-text"));
+        server.verify();
+    }
+
+    @Test
     void omitsJsonModeForOpenAiModelsNotInTheJsonModeAllowList() throws Exception {
         ReflectionTestUtils.setField(service, "allowedModels", "custom-chat-model");
         server.expect(requestTo(OPENAI_URL))
@@ -90,8 +149,22 @@ class OpenAiServiceTests {
     }
 
     @Test
+    void retriesInvalidNvidiaSchemaOnceAndReturnsCorrectedResponse() throws Exception {
+        String missingStep = VALID_CONTENT.replace("\"step7\":{\"questions\":[{\"q\":\"Why a map?\",\"a\":\"It stores indices.\"}]},", "");
+        server.expect(requestTo(NVIDIA_URL)).andRespond(withSuccess(upstreamResponse(missingStep), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(NVIDIA_URL))
+                .andExpect(content().string(containsString("schema validation")))
+                .andRespond(withSuccess(upstreamResponse(VALID_CONTENT), MediaType.APPLICATION_JSON));
+
+        var result = service.getCodeMentorResponse("Explain Two Sum", "nv-test-key", "openai/gpt-oss-20b", "nvidia");
+
+        assertEquals("Two Sum", result.getTopic());
+        server.verify();
+    }
+
+    @Test
     void normalizesMistakesArrayToTheDtoStringField() throws Exception {
-        String content = VALID_CONTENT.replace("\"step8\":{}", "\"step8\":{\"mistakes\":[\"Using nested loops\",\"Ignoring duplicates\"]}");
+        String content = VALID_CONTENT.replace("\"mistakes\":\"Check indices\"", "\"mistakes\":[\"Using nested loops\",\"Ignoring duplicates\"]");
         server.expect(requestTo(OPENAI_URL))
                 .andRespond(withSuccess(upstreamResponse(content), MediaType.APPLICATION_JSON));
 
@@ -103,15 +176,14 @@ class OpenAiServiceTests {
 
     @Test
     void reportsTheDtoFieldPathWhenProviderTypesDoNotMatch() throws Exception {
-        String content = VALID_CONTENT.replace("\"step1\":{}", "\"step1\":{\"constraints\":{\"lower\":1}}");
+        String content = VALID_CONTENT.replace("\"constraints\":[\"One solution\"]", "\"constraints\":{\"lower\":1}");
         server.expect(requestTo(OPENAI_URL))
                 .andRespond(withSuccess(upstreamResponse(content), MediaType.APPLICATION_JSON));
 
         AiServiceException exception = assertThrows(AiServiceException.class,
                 () -> service.getCodeMentorResponse("Explain Two Sum", null, "gpt-4o-mini"));
 
-        assertTrue(exception.getMessage().contains("constraints"));
-        assertTrue(exception.getCause() instanceof com.fasterxml.jackson.databind.JsonMappingException);
+        assertTrue(exception.getMessage().contains("$.step1.constraints"));
         assertEquals(200, exception.getUpstreamStatus());
         server.verify();
     }
