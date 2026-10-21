@@ -24,6 +24,8 @@ function App() {
   // Track if SettingsModal is open
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
+  const [selectedProvider, setSelectedProvider] = useState("openai");
+  const [apiKey, setApiKey] = useState("");
 
   // Active chat session ID. Null represents starting screen (LandingScreen)
   const [activeChatId, setActiveChatId] = useState(null);
@@ -102,6 +104,8 @@ function App() {
             initialPrompt={currentPrompt}
             onBackToLanding={handleNewChat}
             selectedModel={selectedModel}
+            selectedProvider={selectedProvider}
+            apiKey={apiKey}
             onOpenSettings={() => setIsSettingsOpen(true)}
           />
         )}
@@ -118,6 +122,10 @@ function App() {
         onClose={() => setIsSettingsOpen(false)}
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
+        selectedProvider={selectedProvider}
+        onProviderChange={setSelectedProvider}
+        apiKey={apiKey}
+        onApiKeyChange={setApiKey}
       />
     </div>
   );

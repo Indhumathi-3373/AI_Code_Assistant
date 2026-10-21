@@ -54,16 +54,36 @@ public class OpenAiService {
     }
 
     public ChatResponse getCodeMentorResponse(String userPrompt, String userApiKey, String requestedModel) {
-        String activeApiKey = StringUtils.hasText(apiKey) ? apiKey.trim() : (StringUtils.hasText(userApiKey) ? userApiKey.trim() : null);
+        return getCodeMentorResponse(userPrompt, userApiKey, requestedModel, "openai");
+    }
+
+    public ChatResponse getCodeMentorResponse(String userPrompt, String userApiKey, String requestedModel, String requestedProvider) {
+        String provider = StringUtils.hasText(requestedProvider) ? requestedProvider.trim().toLowerCase(Locale.ROOT) : "openai";
+        if (!Set.of("openai", "nvidia").contains(provider)) {
+            throw new InvalidAiConfigurationException("The selected AI provider is not available.");
+        }
+        String activeApiKey = StringUtils.hasText(userApiKey)
+                ? userApiKey.trim()
+                : (provider.equals("openai") && StringUtils.hasText(apiKey) ? apiKey.trim() : null);
         if (!StringUtils.hasText(activeApiKey)) {
-            throw new IllegalStateException("OpenAI API Key is missing. Please set the OPENAI_API_KEY environment variable in your backend.");
+            throw new IllegalStateException(provider.equals("nvidia")
+                    ? "NVIDIA API key is missing. Enter one in Settings → AI Model."
+                    : "OpenAI API Key is missing. Please set the OPENAI_API_KEY environment variable in your backend.");
+        }
+
+        if (provider.equals("nvidia")) {
+            String nvidiaModel = StringUtils.hasText(requestedModel) ? requestedModel.trim() : "openai/gpt-oss-20b";
+            if (!nvidiaModel.matches("[A-Za-z0-9._/-]{1,100}")) {
+                throw new InvalidAiConfigurationException("The selected NVIDIA model name is invalid.");
+            }
+            return requestCompletion(userPrompt, activeApiKey, nvidiaModel, "https://integrate.api.nvidia.com/v1/chat/completions");
         }
 
         List<String> candidateModels = candidateModels(requestedModel);
         AiServiceException lastFailure = null;
         for (String candidateModel : candidateModels) {
             try {
-                return requestCompletion(userPrompt, activeApiKey, candidateModel);
+                return requestCompletion(userPrompt, activeApiKey, candidateModel, apiUrl);
             } catch (AiServiceException exception) {
                 if (!exception.isRetryable()) {
                     throw exception;
@@ -76,7 +96,7 @@ public class OpenAiService {
                 : new AiServiceException("All configured AI models are temporarily unavailable.", lastFailure);
     }
 
-    private ChatResponse requestCompletion(String userPrompt, String activeApiKey, String activeModel) {
+    private ChatResponse requestCompletion(String userPrompt, String activeApiKey, String activeModel, String endpoint) {
 
         // Detailed system instructions to force GPT output to conform to JSON schema
         String systemPrompt = "You are CodeMentor AI, an expert computer science interview coach. " +
@@ -129,7 +149,7 @@ public class OpenAiService {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
-            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(endpoint, entity, String.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 Map<String, Object> responseMap = objectMapper.readValue(response.getBody(), Map.class);
@@ -199,19 +219,19 @@ public class OpenAiService {
                 || (exception.getStatusCode().value() == 503 && "server_is_overloaded".equals(errorCode));
 
         if (exception.getStatusCode().value() == 401) {
-            return new AiServiceException("The supplied OpenAI API key is invalid or revoked.", exception);
+            return new AiServiceException("The supplied AI provider API key is invalid or revoked.", exception);
         }
         if (exception.getStatusCode().value() == 403) {
-            return new AiServiceException("The supplied OpenAI API key cannot access the selected model.", exception);
+            return new AiServiceException("The supplied API key cannot access the selected model.", exception);
         }
         if (exception.getStatusCode().value() == 404) {
-            return new AiServiceException("The selected OpenAI model is unavailable.", exception);
+            return new AiServiceException("The selected model is unavailable from this provider.", exception);
         }
         if (exception.getStatusCode().value() == 400) {
-            return new AiServiceException("OpenAI rejected this request. Choose a model that supports chat completions.", exception);
+            return new AiServiceException("The AI provider rejected this request. Check that the selected model supports chat completions.", exception);
         }
         if (exception.getStatusCode().value() == 429 && !retryable) {
-            return new AiServiceException("The OpenAI account has reached a quota or spend limit. Use a key with available quota.", exception);
+            return new AiServiceException("The AI provider account has reached a quota or rate limit. Check its billing and rate limits.", exception);
         }
         return new AiServiceException("The AI service could not complete this request.", exception, retryable);
     }

@@ -169,6 +169,261 @@ const MOCK_DATASETS = {
       pattern: "Stack"
     }
   },
+  "recursion": {
+    topic: "Recursion - Factorial",
+    difficulty: "Easy",
+    isDebug: false,
+    step1: {
+      title: "Step 1: Problem Understanding",
+      problem: "Given a non-negative integer `n`, calculate `n!`. The factorial of 0 is 1, and every other factorial is `n * (n - 1)!`.",
+      input: "n = 5",
+      output: "120",
+      constraints: ["0 <= n <= 12 for an int result", "Define a base case before the recursive call"]
+    },
+    step2: {
+      title: "Step 2: Brute Force Solution",
+      idea: "Multiply all integers from 2 through n using a loop.",
+      code: "public class Solution {\n    public int factorial(int n) {\n        int result = 1;\n        for (int value = 2; value <= n; value++) {\n            result *= value;\n        }\n        return result;\n    }\n}",
+      dryRun: ["result=1 -> multiply 2, 3, 4, and 5 -> 120"],
+      timeComplexity: "O(n)",
+      spaceComplexity: "O(1)"
+    },
+    step3: {
+      question: "How can the smaller instance factorial(n - 1) help solve factorial(n)?",
+      hint1: "Identify the smallest input with a direct answer.",
+      hint2: "For n > 0, reduce the problem size by one.",
+      hint3: "Return n * factorial(n - 1), but stop at n <= 1."
+    },
+    step5: {
+      title: "Step 5: Optimized Solution",
+      explanation: "Recursion expresses the mathematical definition directly: solve a smaller factorial until the base case is reached.",
+      code: "public class Solution {\n    public int factorial(int n) {\n        if (n <= 1) return 1;\n        return n * factorial(n - 1);\n    }\n}",
+      dryRun: ["factorial(5) = 5 * factorial(4)", "factorial(1) returns 1, then calls return 2, 6, 24, and 120"],
+      timeComplexity: "O(n)",
+      spaceComplexity: "O(n) call stack",
+      betterWhy: "The recursive version makes the reduction and base case explicit, which generalizes well to trees and divide-and-conquer problems."
+    },
+    step7: {
+      title: "Step 7: Interview Mode Q&A",
+      questions: [{ q: "What causes a stack overflow?", a: "A recursive function that has no reachable base case, or a recursion depth too large for the call stack." }]
+    },
+    step8: {
+      title: "Step 8: Learning Summary",
+      difficulty: "Easy",
+      concepts: ["Base Case", "Recursive Case", "Call Stack"],
+      mistakes: "Forgetting the base case or recursing without reducing the input.",
+      techniques: ["Solve a smaller instance", "Trace the call stack"],
+      pattern: "Recursion"
+    }
+  },
+  "sliding window": {
+    topic: "Sliding Window - Maximum Sum Subarray",
+    difficulty: "Medium",
+    isDebug: false,
+    step1: {
+      title: "Step 1: Problem Understanding",
+      problem: "Find the maximum sum among all contiguous subarrays of size `k`.",
+      input: "nums = [2, 1, 5, 1, 3, 2], k = 3",
+      output: "9 (subarray [5, 1, 3])",
+      constraints: ["1 <= k <= nums.length", "The window contains exactly k contiguous values"]
+    },
+    step2: {
+      title: "Step 2: Brute Force Solution",
+      idea: "For every possible starting index, sum the next k values from scratch.",
+      code: "public class Solution {\n    public int maxSum(int[] nums, int k) {\n        int best = Integer.MIN_VALUE;\n        for (int start = 0; start <= nums.length - k; start++) {\n            int sum = 0;\n            for (int index = start; index < start + k; index++) sum += nums[index];\n            best = Math.max(best, sum);\n        }\n        return best;\n    }\n}",
+      dryRun: ["[2,1,5] = 8, [1,5,1] = 7, [5,1,3] = 9"],
+      timeComplexity: "O(n * k)",
+      spaceComplexity: "O(1)"
+    },
+    step3: {
+      question: "When the window moves right by one position, which two values change the sum?",
+      hint1: "Remove the value leaving the left edge.",
+      hint2: "Add the value entering from the right edge.",
+      hint3: "Keep one running windowSum instead of recalculating it."
+    },
+    step5: {
+      title: "Step 5: Optimized Solution",
+      explanation: "Build the first window, then slide it by subtracting the outgoing value and adding the incoming value.",
+      code: "public class Solution {\n    public int maxSum(int[] nums, int k) {\n        int windowSum = 0;\n        for (int i = 0; i < k; i++) windowSum += nums[i];\n        int best = windowSum;\n        for (int right = k; right < nums.length; right++) {\n            windowSum += nums[right] - nums[right - k];\n            best = Math.max(best, windowSum);\n        }\n        return best;\n    }\n}",
+      dryRun: ["First window sum = 8", "Slide to [5,1,3]: 7 - 1 + 3 = 9"],
+      timeComplexity: "O(n)",
+      spaceComplexity: "O(1)",
+      betterWhy: "Each array value is added and removed at most once."
+    },
+    step7: {
+      title: "Step 7: Interview Mode Q&A",
+      questions: [{ q: "When is a fixed-size window appropriate?", a: "When every valid subarray has the same required size, such as k consecutive elements." }]
+    },
+    step8: {
+      title: "Step 8: Learning Summary",
+      difficulty: "Medium",
+      concepts: ["Contiguous Subarrays", "Running Sum", "Two Pointers"],
+      mistakes: "Forgetting to subtract the element that leaves the window.",
+      techniques: ["Fixed-size window", "Incremental sum update"],
+      pattern: "Sliding Window"
+    }
+  },
+  "prefix sum": {
+    topic: "Prefix Sum - Range Sum Query",
+    difficulty: "Easy",
+    isDebug: false,
+    step1: {
+      title: "Step 1: Problem Understanding",
+      problem: "Answer sum queries for inclusive ranges [left, right] in an integer array.",
+      input: "nums = [-2, 0, 3, -5, 2, -1], query = [0, 2]",
+      output: "1",
+      constraints: ["0 <= left <= right < nums.length", "Many queries may be asked for the same array"]
+    },
+    step2: {
+      title: "Step 2: Brute Force Solution",
+      idea: "For each query, loop from left through right and add every value.",
+      code: "public class Solution {\n    public int rangeSum(int[] nums, int left, int right) {\n        int sum = 0;\n        for (int i = left; i <= right; i++) sum += nums[i];\n        return sum;\n    }\n}",
+      dryRun: ["For [0,2], add -2 + 0 + 3 = 1"],
+      timeComplexity: "O(n) per query",
+      spaceComplexity: "O(1)"
+    },
+    step3: {
+      question: "Can a precomputed cumulative sum make every range query constant time?",
+      hint1: "Let prefix[i] store the sum of the first i values.",
+      hint2: "Use a prefix array with one extra leading zero.",
+      hint3: "The sum from left to right is prefix[right + 1] - prefix[left]."
+    },
+    step5: {
+      title: "Step 5: Optimized Solution",
+      explanation: "Precompute cumulative sums once, then subtract the sum before left from the sum through right.",
+      code: "public class Solution {\n    private final int[] prefix;\n\n    public Solution(int[] nums) {\n        prefix = new int[nums.length + 1];\n        for (int i = 0; i < nums.length; i++) {\n            prefix[i + 1] = prefix[i] + nums[i];\n        }\n    }\n\n    public int rangeSum(int left, int right) {\n        return prefix[right + 1] - prefix[left];\n    }\n}",
+      dryRun: ["prefix = [0,-2,-2,1,-4,-2,-3]", "range [0,2] = prefix[3] - prefix[0] = 1"],
+      timeComplexity: "O(n) setup, O(1) per query",
+      spaceComplexity: "O(n)",
+      betterWhy: "The preprocessing cost is shared by every later query."
+    },
+    step7: {
+      title: "Step 7: Interview Mode Q&A",
+      questions: [{ q: "Why use a prefix array of length n + 1?", a: "The leading zero makes ranges starting at index 0 use the same subtraction formula." }]
+    },
+    step8: {
+      title: "Step 8: Learning Summary",
+      difficulty: "Easy",
+      concepts: ["Cumulative Sum", "Range Query", "Preprocessing"],
+      mistakes: "Using prefix[right] - prefix[left] and excluding the right endpoint.",
+      techniques: ["Leading-zero prefix array"],
+      pattern: "Prefix Sum"
+    }
+  },
+  "two pointers": {
+    topic: "Two Pointers - Pair Sum in Sorted Array",
+    difficulty: "Easy",
+    isDebug: false,
+    step1: {
+      title: "Step 1: Problem Understanding",
+      problem: "Given a sorted integer array `nums` and a target, return the indices of two values whose sum equals the target. Assume exactly one answer exists.",
+      input: "nums = [1, 2, 4, 6, 10], target = 8",
+      output: "[1, 3] (nums[1] + nums[3] == 8)",
+      constraints: ["2 <= nums.length <= 10^4", "nums is sorted in ascending order", "Exactly one valid pair exists"]
+    },
+    step2: {
+      title: "Step 2: Brute Force Solution",
+      idea: "Check every pair until their sum equals the target.",
+      code: "public class Solution {\n    public int[] pairSum(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) {\n            for (int j = i + 1; j < nums.length; j++) {\n                if (nums[i] + nums[j] == target) return new int[] { i, j };\n            }\n        }\n        return new int[] { -1, -1 };\n    }\n}",
+      dryRun: ["Try pairs until 2 + 6 == 8, then return [1, 3]."],
+      timeComplexity: "O(n²)",
+      spaceComplexity: "O(1)"
+    },
+    step3: {
+      question: "How can the sorted order tell us which side of the search to move?",
+      hint1: "Start one pointer at each end of the array.",
+      hint2: "If the sum is too small, move the left pointer right.",
+      hint3: "If the sum is too large, move the right pointer left."
+    },
+    step5: {
+      title: "Step 5: Optimized Solution",
+      explanation: "Because the array is sorted, each comparison lets us safely discard one side while moving two pointers inward.",
+      code: "public class Solution {\n    public int[] pairSum(int[] nums, int target) {\n        int left = 0, right = nums.length - 1;\n        while (left < right) {\n            int sum = nums[left] + nums[right];\n            if (sum == target) return new int[] { left, right };\n            if (sum < target) left++;\n            else right--;\n        }\n        return new int[] { -1, -1 };\n    }\n}",
+      dryRun: ["left=0, right=4: 1+10=11, too large -> right--", "left=0, right=3: 1+6=7, too small -> left++", "left=1, right=3: 2+6=8 -> return [1,3]"],
+      timeComplexity: "O(n)",
+      spaceComplexity: "O(1)",
+      betterWhy: "Each pointer moves at most n times, so the sorted array is scanned once without extra storage."
+    },
+    step7: {
+      title: "Step 7: Interview Mode Q&A",
+      questions: [{ q: "Why does this pointer movement work?", a: "The array is sorted: increasing the left value raises the sum, while decreasing the right value lowers it." }]
+    },
+    step8: {
+      title: "Step 8: Learning Summary",
+      difficulty: "Easy",
+      concepts: ["Sorted Arrays", "Monotonic Search"],
+      mistakes: "Using this strategy on an unsorted array without first preserving or restoring the original indices.",
+      techniques: ["Move pointers inward based on the current sum"],
+      pattern: "Two Pointers"
+    }
+  },
+  "kadane algorithm": {
+    topic: "Kadane's Algorithm - Maximum Subarray",
+    difficulty: "Medium",
+    isDebug: false,
+    step1: {
+      title: "Step 1: Problem Understanding",
+      problem: "Given an integer array, find the contiguous subarray with the largest sum and return that sum.",
+      input: "nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]",
+      output: "6 (subarray [4, -1, 2, 1])",
+      constraints: ["1 <= nums.length <= 10^5", "The array may contain negative values"]
+    },
+    step2: {
+      title: "Step 2: Brute Force Solution",
+      idea: "Consider every possible starting index and extend each subarray, tracking its sum.",
+      code: "public class Solution {\n    public int maxSubArray(int[] nums) {\n        int best = Integer.MIN_VALUE;\n        for (int start = 0; start < nums.length; start++) {\n            int sum = 0;\n            for (int end = start; end < nums.length; end++) {\n                sum += nums[end];\n                best = Math.max(best, sum);\n            }\n        }\n        return best;\n    }\n}",
+      dryRun: ["Enumerate contiguous subarrays and keep the largest sum found: 6."],
+      timeComplexity: "O(n²)",
+      spaceComplexity: "O(1)"
+    },
+    step3: {
+      question: "When should a running subarray sum be discarded?",
+      hint1: "A negative running sum only makes a future subarray smaller.",
+      hint2: "At each value, either extend the current subarray or start fresh.",
+      hint3: "Keep a separate best value so arrays containing only negatives work."
+    },
+    step5: {
+      title: "Step 5: Optimized Solution",
+      explanation: "Track the best sum ending at the current position and the best sum seen anywhere. Start fresh when the current value is better than extending the prior sum.",
+      code: "public class Solution {\n    public int maxSubArray(int[] nums) {\n        int current = nums[0];\n        int best = nums[0];\n        for (int i = 1; i < nums.length; i++) {\n            current = Math.max(nums[i], current + nums[i]);\n            best = Math.max(best, current);\n        }\n        return best;\n    }\n}",
+      dryRun: ["At 4, start a new run with sum 4.", "Extend through -1, 2, 1 to reach sum 6.", "Keep best=6; later values do not improve it."],
+      timeComplexity: "O(n)",
+      spaceComplexity: "O(1)",
+      betterWhy: "One pass considers the best subarray ending at each position, avoiding all repeated subarray scans."
+    },
+    step7: {
+      title: "Step 7: Interview Mode Q&A",
+      questions: [{ q: "Why initialize current and best from nums[0]?", a: "It handles arrays containing only negative values and avoids incorrectly returning zero." }]
+    },
+    step8: {
+      title: "Step 8: Learning Summary",
+      difficulty: "Medium",
+      concepts: ["Dynamic Programming", "Running State", "Contiguous Subarrays"],
+      mistakes: "Initializing the answer to zero, which fails when all values are negative.",
+      techniques: ["Reset a negative running sum by starting a new subarray"],
+      pattern: "Kadane's Algorithm"
+    }
+  },
+  "offline unavailable": {
+    topic: "Offline Demo - Limited Topics",
+    difficulty: "Easy",
+    isDebug: false,
+    step1: {
+      title: "Offline Demo Availability",
+      problem: "This prompt is not included in the offline demo. Offline mode provides a limited set of prepared learning lessons.",
+      input: "Try: Two Sum, Binary Search, Recursion, Sliding Window, Prefix Sum, Two Pointers, Kadane's Algorithm, Valid Parentheses, or a Java debugging question.",
+      output: "This topic will be available soon in the offline demo. Connect an API key for an AI-generated answer.",
+      constraints: ["Offline demo responses are prebuilt", "Live AI requires a valid API key with available quota"]
+    },
+    step8: {
+      title: "Next Step",
+      difficulty: "Easy",
+      concepts: ["Offline Demo Mode"],
+      mistakes: "Expecting an AI-generated answer while offline demo mode is selected.",
+      techniques: ["Choose a supported lesson", "Connect a provider API key for live responses"],
+      pattern: "Limited Offline Access"
+    }
+  },
   "debugging": {
     topic: "Debugging - Java Code Repair",
     difficulty: "Medium",
@@ -197,7 +452,7 @@ const MOCK_DATASETS = {
 };
 
 function getOfflineDataset(promptText = "") {
-  const lower = promptText.toLowerCase();
+  const lower = promptText.toLowerCase().replace(/[’]/g, "'");
 
   if (lower.includes("debug") || lower.includes("fix") || lower.includes("error") || (lower.includes("{") && lower.includes("}"))) {
     return JSON.parse(JSON.stringify(MOCK_DATASETS["debugging"]));
@@ -205,19 +460,32 @@ function getOfflineDataset(promptText = "") {
   if (lower.includes("binary") || lower.includes("search")) {
     return JSON.parse(JSON.stringify(MOCK_DATASETS["binary search"]));
   }
+  if (lower.includes("recursion") || lower.includes("recursive") || lower.includes("factorial")) {
+    return JSON.parse(JSON.stringify(MOCK_DATASETS["recursion"]));
+  }
+  if (lower.includes("sliding window") || lower.includes("window") || (lower.includes("maximum sum subarray") && (lower.includes("size") || lower.includes(" k")))) {
+    return JSON.parse(JSON.stringify(MOCK_DATASETS["sliding window"]));
+  }
+  if (lower.includes("prefix sum") || lower.includes("prefix-sum") || lower.includes("range sum") || lower.includes("subarray sum")) {
+    return JSON.parse(JSON.stringify(MOCK_DATASETS["prefix sum"]));
+  }
+  if (lower.includes("kadane") || lower.includes("maximum subarray") || lower.includes("max subarray")) {
+    return JSON.parse(JSON.stringify(MOCK_DATASETS["kadane algorithm"]));
+  }
+  if (lower.includes("two pointer") || lower.includes("two-pointer") || lower.includes("pair sum") || lower.includes("pair with target")) {
+    return JSON.parse(JSON.stringify(MOCK_DATASETS["two pointers"]));
+  }
   if (lower.includes("parenthes") || lower.includes("bracket") || lower.includes("stack")) {
     return JSON.parse(JSON.stringify(MOCK_DATASETS["valid parentheses"]));
   }
   
-  // Default to two sum or customized topic
-  const data = JSON.parse(JSON.stringify(MOCK_DATASETS["two sum"]));
-  if (!(lower.includes("two sum") || lower.includes("sum"))) {
-    data.topic = promptText.length > 30 ? promptText.substring(0, 30) + "..." : promptText;
+  if (lower.includes("two sum")) {
+    return JSON.parse(JSON.stringify(MOCK_DATASETS["two sum"]));
   }
-  return data;
+  return JSON.parse(JSON.stringify(MOCK_DATASETS["offline unavailable"]));
 }
 
-function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedModel = "gpt-4o-mini", onOpenSettings }) {
+function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedModel = "gpt-4o-mini", selectedProvider = "openai", apiKey = "", onOpenSettings }) {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [model, setModel] = useState(selectedModel);
@@ -287,10 +555,12 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedMode
 
     try {
       // Connect to the Spring Boot REST endpoint
-      // Credentials are kept strictly on the backend server environment
+      // The optional key is sent only to the local backend, which forwards it to OpenAI.
       const requestBody = {
         prompt: promptText,
-        model: model !== "offline-demo" ? model : "gpt-4o-mini"
+        ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}),
+        model: model !== "offline-demo" ? model : "gpt-4o-mini",
+        provider: selectedProvider
       };
 
       const response = await fetch("http://localhost:8080/api/chat", {
@@ -329,9 +599,9 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedMode
         type: "error",
         status: err.status || 500,
         title: isQuotaError
-          ? "OpenAI Quota Limit Exceeded (HTTP 502)"
+          ? "AI Provider Quota Limit Exceeded (HTTP 502)"
           : isMissingKey
-          ? "OpenAI API Key Missing (HTTP 503)"
+          ? `${selectedProvider === "nvidia" ? "NVIDIA" : "OpenAI"} API Key Missing (HTTP 503)`
           : `AI Service Error (${err.status || "Connection Error"})`,
         message: err.message || "Failed to communicate with the backend AI service.",
         failedPrompt: promptText,
@@ -397,9 +667,18 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedMode
         <div className="chat-area__model-selector">
           <span className="model-label">Model:</span>
           <select value={model} onChange={(e) => setModel(e.target.value)} className="model-select">
-            <option value="gpt-4o-mini">GPT-4o Mini (Default - OpenAI)</option>
-            <option value="gpt-4o">GPT-4o (High Intelligence)</option>
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            {selectedProvider === "nvidia" ? (
+              <>
+                <option value="openai/gpt-oss-20b">GPT OSS 20B (NVIDIA NIM)</option>
+                <option value="qwen/qwen3-next-80b-a3b-instruct">Qwen3 Next 80B (NVIDIA NIM)</option>
+              </>
+            ) : (
+              <>
+                <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
+                <option value="gpt-4o">GPT-4o (High Intelligence)</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              </>
+            )}
             <option value="offline-demo">Offline Demo Mode (Local Knowledge Base)</option>
           </select>
         </div>

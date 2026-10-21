@@ -55,3 +55,11 @@ The Settings modal accepts a user-supplied OpenAI key and model. After selecting
 only in chat requests to the backend; it is never persisted in the database.
 Refresh the page to clear it. The backend validates the selected model against
 `OPENAI_ALLOWED_MODELS` before sending a request.
+
+## NVIDIA NIM
+
+To use NVIDIA-hosted models, open **Settings → AI Model**, select **NVIDIA NIM**,
+enter an NVIDIA API key, and choose a listed model. NVIDIA requests use the
+OpenAI-compatible NVIDIA endpoint at `https://integrate.api.nvidia.com/v1/chat/completions`.
+The NVIDIA key is held in browser memory for the session and sent only to the
+local backend. The default model is `openai/gpt-oss-20b`.

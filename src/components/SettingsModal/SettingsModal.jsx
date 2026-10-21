@@ -45,6 +45,10 @@ const AI_MODELS = [
   { value: 'gpt-4o', label: 'gpt-4o (High Intelligence)' },
   { value: 'gpt-3.5-turbo', label: 'gpt-3.5-turbo (Legacy)' },
 ];
+const NVIDIA_MODELS = [
+  { value: 'openai/gpt-oss-20b', label: 'GPT OSS 20B (NVIDIA NIM)' },
+  { value: 'qwen/qwen3-next-80b-a3b-instruct', label: 'Qwen3 Next 80B (NVIDIA NIM)' },
+];
 
 // ------------------------------------------------------------------
 // Sub-component: Toggle switch
@@ -180,10 +184,25 @@ function AppearanceSection({ settings, onUpdate }) {
 // ------------------------------------------------------------------
 // Section: AI Model
 // ------------------------------------------------------------------
-function AIModelSection({ settings, onUpdate, onAiConnectionChange }) {
+function AIModelSection({ settings, onUpdate, onAiConnectionChange, apiKey, onApiKeyChange, selectedProvider, onProviderChange, onModelChange }) {
+  const models = selectedProvider === 'nvidia' ? NVIDIA_MODELS : AI_MODELS;
   return (
     <div className="settings-section">
       <h3 className="settings-section__title">AI Model</h3>
+
+      <SettingRow label="Provider" description="Choose which service receives your chat request.">
+        <select className="settings-select" value={selectedProvider} onChange={(e) => {
+          const nextProvider = e.target.value;
+          const nextModel = nextProvider === 'nvidia' ? NVIDIA_MODELS[0].value : AI_MODELS[0].value;
+          onProviderChange(nextProvider);
+          onApiKeyChange('');
+          onUpdate('model', nextModel);
+          onModelChange(nextModel);
+        }}>
+          <option value="openai">OpenAI</option>
+          <option value="nvidia">NVIDIA NIM</option>
+        </select>
+      </SettingRow>
 
       {/* Model selector */}
       <SettingRow
@@ -199,10 +218,22 @@ function AIModelSection({ settings, onUpdate, onAiConnectionChange }) {
             onAiConnectionChange((prev) => ({ ...prev, model: nextModel }));
           }}
         >
-          {AI_MODELS.map((m) => (
+          {models.map((m) => (
             <option key={m.value} value={m.value}>{m.label}</option>
           ))}
         </select>
+      </SettingRow>
+
+      <SettingRow label={`${selectedProvider === 'nvidia' ? 'NVIDIA' : 'OpenAI'} API key`} description={selectedProvider === 'nvidia' ? 'Required for NVIDIA NIM. Kept in memory for this session.' : 'Optional. Kept in memory for this session and used instead of the backend key.'}>
+        <input
+          className="settings-select"
+          type="password"
+          autoComplete="off"
+          placeholder={selectedProvider === 'nvidia' ? 'nvapi-…' : 'sk-…'}
+          value={apiKey}
+          onChange={(e) => onApiKeyChange(e.target.value)}
+          aria-label={`${selectedProvider === 'nvidia' ? 'NVIDIA' : 'OpenAI'} API key`}
+        />
       </SettingRow>
 
       {/* Temperature slider */}
@@ -230,13 +261,10 @@ function AIModelSection({ settings, onUpdate, onAiConnectionChange }) {
       {/* Secure Backend Configuration Notice */}
       <div className="settings-apikey-block">
         <p className="settings-apikey-note">
-          🔒 <strong>Secure Server-Side Credentials</strong>: API keys are securely managed
-          by the backend environment (via <code>OPENAI_API_KEY</code> in <code>backend/.env</code> or system environment variables)
-          and are never exposed to browser bundles or client network requests.
+          <strong>API key handling:</strong> The key above is held in browser memory and sent to your local backend for chat requests; it is not saved. OpenAI can use <code>OPENAI_API_KEY</code> when its key field is blank. NVIDIA requires its own key.
         </p>
         <p style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          If you encounter an <em>OpenAI quota/spend limit</em> error (HTTP 502), ensure your OpenAI account
-          has positive prepaid credits at <a href="https://platform.openai.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>platform.openai.com/billing</a> and update your key in <code>backend/.env</code>.
+          If you encounter a quota error (HTTP 502), check the selected provider account's quota or enter a key with available quota.
         </p>
       </div>
     </div>
@@ -335,7 +363,7 @@ function AboutSection() {
 // ------------------------------------------------------------------
 // Main Component: SettingsModal
 // ------------------------------------------------------------------
-export default function SettingsModal({ isOpen, onClose, selectedModel = 'gpt-4o-mini', onModelChange = () => {} }) {
+export default function SettingsModal({ isOpen, onClose, selectedModel = 'gpt-4o-mini', onModelChange = () => {}, selectedProvider = 'openai', onProviderChange = () => {}, apiKey = '', onApiKeyChange = () => {} }) {
   // Active sidebar section
   const [activeSection, setActiveSection] = useState('general');
 
@@ -380,7 +408,7 @@ export default function SettingsModal({ isOpen, onClose, selectedModel = 'gpt-4o
     switch (activeSection) {
       case 'general':    return <GeneralSection settings={settings} onUpdate={updateSetting} />;
       case 'appearance': return <AppearanceSection settings={settings} onUpdate={updateSetting} />;
-      case 'ai':         return <AIModelSection settings={settings} onUpdate={updateSetting} onAiConnectionChange={(fnOrObj) => {
+      case 'ai':         return <AIModelSection settings={settings} apiKey={apiKey} onApiKeyChange={onApiKeyChange} selectedProvider={selectedProvider} onProviderChange={onProviderChange} onModelChange={onModelChange} onUpdate={updateSetting} onAiConnectionChange={(fnOrObj) => {
         const next = typeof fnOrObj === 'function' ? fnOrObj(settings).model : fnOrObj?.model;
         if (next) onModelChange(next);
       }} />;

@@ -20,6 +20,9 @@ public class ChatRequest {
     private String apiKey;
 
     @Size(max = 100, message = "Model name is too long.")
-    @Pattern(regexp = "^[A-Za-z0-9._-]*$", message = "Model name is invalid.")
+    @Pattern(regexp = "^[A-Za-z0-9._/-]*$", message = "Model name is invalid.")
     private String model;
+
+    @Pattern(regexp = "^(openai|nvidia)?$", message = "AI provider is invalid.")
+    private String provider;
 }
