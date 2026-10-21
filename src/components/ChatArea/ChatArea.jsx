@@ -555,7 +555,7 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedMode
 
     try {
       // Connect to the Spring Boot REST endpoint
-      // The optional key is sent only to the local backend, which forwards it to OpenAI.
+      // The optional provider key is sent only to the local backend.
       const requestBody = {
         prompt: promptText,
         ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}),
@@ -571,15 +571,42 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedMode
         body: JSON.stringify(requestBody),
       });
 
+      const responseText = await response.text();
+      let responseBody = null;
+      try {
+        responseBody = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        // Retain a short plain-text diagnostic for proxy/server error pages.
+      }
+
       if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({}));
-        const message = errorBody.message || `Server returned HTTP ${response.status} (${response.statusText})`;
+        const bodyMessage = responseBody?.message || (responseText && responseText.slice(0, 500).trim());
+        const message = bodyMessage || `Server returned HTTP ${response.status} (${response.statusText})`;
         const error = new Error(message);
         error.status = response.status;
+        error.upstreamStatus = responseBody?.upstreamStatus ? Number(responseBody.upstreamStatus) : null;
         throw error;
       }
 
-      const data = await response.json();
+      if (!responseBody || typeof responseBody !== "object" || Array.isArray(responseBody)) {
+        const error = new Error("The backend returned a successful response that was not valid JSON.");
+        error.status = response.status;
+        error.kind = "invalid-response";
+        throw error;
+      }
+
+      const requiredSteps = responseBody.isDebug
+        ? [responseBody.step6, responseBody.step8]
+        : [responseBody.step1, responseBody.step2, responseBody.step3, responseBody.step5, responseBody.step7, responseBody.step8];
+      const hasExpectedFlow = requiredSteps.every((step) => step && typeof step === "object" && !Array.isArray(step));
+      if (typeof responseBody.topic !== "string" || !responseBody.topic.trim() || !hasExpectedFlow) {
+        const error = new Error("The AI response is missing the expected coding tutor fields.");
+        error.status = response.status;
+        error.kind = "invalid-response";
+        throw error;
+      }
+
+      const data = responseBody;
       data.id = `msg-ai-${Date.now()}`;
       data.type = "ai";
 
@@ -591,18 +618,32 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedMode
     } catch (err) {
       console.error("AI service request failed:", err);
 
-      const isQuotaError = err.message && err.message.toLowerCase().includes("quota");
-      const isMissingKey = err.message && err.message.toLowerCase().includes("missing");
+      const errorText = (err.message || "").toLowerCase();
+      const isQuotaError = err.status === 429 || /quota|rate limit/.test(errorText);
+      const isAuthError = /api key.*(invalid|revoked)|cannot access|unauthorized/.test(errorText);
+      const isMissingKey = /key.*missing|missing.*key/.test(errorText);
+      const isModelError = /model.*(unavailable|not available|supports chat)|selected model/.test(errorText);
+      const isTimeout = err.status === 504 || /timed out|timeout/.test(errorText);
+      const isInvalidResponse = err.kind === "invalid-response" || /invalid response|response data|tutor fields/.test(errorText);
 
       const errorMsg = {
         id: `msg-error-${Date.now()}`,
         type: "error",
-        status: err.status || 500,
+        status: err.status ?? null,
+        upstreamStatus: err.upstreamStatus ?? null,
         title: isQuotaError
-          ? "AI Provider Quota Limit Exceeded (HTTP 502)"
+          ? `AI Provider Rate Limit or Quota (HTTP ${err.status || 429})`
+          : isAuthError
+          ? `${selectedProvider === "nvidia" ? "NVIDIA" : "OpenAI"} API Key Rejected (HTTP ${err.status || "502"})`
           : isMissingKey
-          ? `${selectedProvider === "nvidia" ? "NVIDIA" : "OpenAI"} API Key Missing (HTTP 503)`
-          : `AI Service Error (${err.status || "Connection Error"})`,
+          ? `${selectedProvider === "nvidia" ? "NVIDIA" : "OpenAI"} API Key Missing (HTTP ${err.status || "503"})`
+          : isModelError
+          ? `AI Model Configuration Error (HTTP ${err.status ?? "unknown"})`
+          : isTimeout
+          ? `AI Provider Timeout (HTTP ${err.status || 504})`
+          : isInvalidResponse
+          ? `Invalid AI Response (HTTP ${err.status ?? "unknown"})`
+          : `AI Service Error (${err.status ?? "Connection Error"})`,
         message: err.message || "Failed to communicate with the backend AI service.",
         failedPrompt: promptText,
       };
@@ -716,6 +757,9 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedMode
                           <h4 className="api-error-card__title">{msg.title || "AI Service Error"}</h4>
                         </div>
                         <p className="api-error-card__message">{msg.message}</p>
+                        {msg.upstreamStatus && (
+                          <p className="api-error-card__hint">Provider HTTP status: {msg.upstreamStatus}</p>
+                        )}
                         <div className="api-error-card__actions">
                           {msg.failedPrompt && (
                             <button
@@ -728,10 +772,12 @@ function ChatArea({ initialPrompt = "", onBackToLanding = () => {}, selectedMode
                             </button>
                           )}
                           <span className="api-error-card__hint">
-                            {msg.message?.toLowerCase().includes("quota")
-                              ? "The OpenAI account has reached its billing quota. Add credits at platform.openai.com/billing or configure an active OPENAI_API_KEY in backend/.env."
+                            {msg.message?.toLowerCase().includes("quota") || msg.message?.toLowerCase().includes("rate limit")
+                              ? `Check the ${selectedProvider === "nvidia" ? "NVIDIA NIM" : "OpenAI"} account quota and rate limits.`
+                              : msg.message?.toLowerCase().includes("invalid") || msg.message?.toLowerCase().includes("revoked")
+                              ? `Check that the ${selectedProvider === "nvidia" ? "NVIDIA" : "OpenAI"} API key is valid and can access the selected model.`
                               : msg.message?.toLowerCase().includes("missing")
-                              ? "Configure OPENAI_API_KEY in backend/.env or your backend terminal environment."
+                              ? `Enter a ${selectedProvider === "nvidia" ? "NVIDIA" : "OpenAI"} API key in Settings or configure the backend key.`
                               : "Check backend application console logs for details."}
                           </span>
                         </div>

@@ -45,8 +45,13 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(AiServiceException.class)
-    public ResponseEntity<Map<String, String>> upstreamFailure(RuntimeException exception) {
-        return response(HttpStatus.BAD_GATEWAY, exception.getMessage());
+    public ResponseEntity<Map<String, String>> upstreamFailure(AiServiceException exception) {
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("message", exception.getMessage());
+        if (exception.getUpstreamStatus() != null) {
+            body.put("upstreamStatus", exception.getUpstreamStatus().toString());
+        }
+        return ResponseEntity.status(exception.getHttpStatus()).body(body);
     }
 
     private ResponseEntity<Map<String, String>> response(HttpStatus status, String message) {

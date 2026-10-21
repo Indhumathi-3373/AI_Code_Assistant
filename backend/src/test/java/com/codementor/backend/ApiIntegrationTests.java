@@ -97,12 +97,27 @@ class ApiIntegrationTests {
     @Test
     void chatReturnsSafeAiFailureMessages() throws Exception {
         when(openAiService.getCodeMentorResponse(anyString(), any(), any()))
-                .thenThrow(new AiServiceException("The supplied OpenAI API key is invalid or revoked."));
+                .thenThrow(new AiServiceException("The supplied OpenAI API key is invalid or revoked.", null,
+                        false, org.springframework.http.HttpStatus.BAD_GATEWAY, 401));
 
         mockMvc.perform(post("/api/chat")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"prompt\":\"Explain a hash map\"}"))
                 .andExpect(status().isBadGateway())
-                .andExpect(jsonPath("$.message").value("The supplied OpenAI API key is invalid or revoked."));
+                .andExpect(jsonPath("$.message").value("The supplied OpenAI API key is invalid or revoked."))
+                .andExpect(jsonPath("$.upstreamStatus").value("401"));
+    }
+
+    @Test
+    void chatPreservesTheGatewayTimeoutStatus() throws Exception {
+        when(openAiService.getCodeMentorResponse(anyString(), any(), any()))
+                .thenThrow(new AiServiceException("The AI provider request timed out.", null, true,
+                        org.springframework.http.HttpStatus.GATEWAY_TIMEOUT));
+
+        mockMvc.perform(post("/api/chat")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"prompt\":\"Explain a hash map\"}"))
+                .andExpect(status().isGatewayTimeout())
+                .andExpect(jsonPath("$.message").value("The AI provider request timed out."));
     }
 }
